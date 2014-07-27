@@ -33,7 +33,8 @@ class Reportabug : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit Reportabug(QWidget *parent = 0);
+    explicit Reportabug(QWidget *parent = 0,
+                        bool debugCmd = false);
     ~Reportabug();
 
 public slots:
@@ -50,16 +51,13 @@ private slots:
     void replyFinished(QNetworkReply *reply);
 
 private:
+    bool debug;
     Ui::Reportabug *ui;
     void createActions();
     void createComboBox();
     int getNumberByIndex(const int index);
     // ESC pressed event
     void keyPressEvent(QKeyEvent *pressedKey);
-    QString parseCmd(QString line,
-                     const QString password = QString(),
-                     const QString text = QString(),
-                     const QString username = QString());
     QString parseString(QString line);
     QByteArray prepareRequest(const QString title, const QString body);
 };

@@ -29,8 +29,9 @@
 #include "config.h"
 
 
-Reportabug::Reportabug(QWidget *parent)
+Reportabug::Reportabug(QWidget *parent, bool debugCmd)
     : QMainWindow(parent),
+      debug(debugCmd),
       ui(new Ui::Reportabug)
 {
     ui->setupUi(this);
@@ -42,12 +43,16 @@ Reportabug::Reportabug(QWidget *parent)
 
 Reportabug::~Reportabug()
 {
+    if (debug) qDebug() << "[Reportabug]" << "[~Reportabug]";
+
     delete ui;
 }
 
 
 void Reportabug::createActions()
 {
+    if (debug) qDebug() << "[Reportabug]" << "[createActions]";
+
     connect(ui->comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateTabs(int)));
     connect(ui->buttonBox->button(QDialogButtonBox::Close), SIGNAL(clicked(bool)), this, SLOT(close()));
     connect(ui->buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked(bool)), this, SLOT(sendReport()));
@@ -56,6 +61,8 @@ void Reportabug::createActions()
 
 void Reportabug::createComboBox()
 {
+    if (debug) qDebug() << "[Reportabug]" << "[createComboBox]";
+
     ui->comboBox->clear();
     if (ENABLE_GITHUB)
         ui->comboBox->addItem(QString(GITHUB_COMBOBOX));
@@ -66,6 +73,9 @@ void Reportabug::createComboBox()
 
 int Reportabug::getNumberByIndex(const int index)
 {
+    if (debug) qDebug() << "[Reportabug]" << "[getNumberByIndex]";
+    if (debug) qDebug() << "[Reportabug]" << "[getNumberByIndex]" << ":" << "Index" << index;
+
     if (index == -1)
         // nothing to do
         return -1;
@@ -87,39 +97,18 @@ int Reportabug::getNumberByIndex(const int index)
 // ESC press event
 void Reportabug::keyPressEvent(QKeyEvent *pressedKey)
 {
+    if (debug) qDebug() << "[Reportabug]" << "[keyPressEvent]";
+
     if (pressedKey->key() == Qt::Key_Escape)
         close();
 }
 
 
-QString Reportabug::parseCmd(QString line,
-                             const QString password,
-                             const QString text,
-                             const QString username)
-{
-    if (line.contains(QString("$ISSUES_URL")))
-        line = line.split(QString("$ISSUES_URL"))[0] +
-                parseString(QString(ISSUES_URL)) +
-                line.split(QString("$ISSUES_URL"))[1];
-    if (line.contains(QString("$PASSWORD")))
-        line = line.split(QString("$PASSWORD"))[0] +
-                password +
-                line.split(QString("$PASSWORD"))[1];
-    if (line.contains(QString("$TEXT")))
-        line = line.split(QString("$TEXT"))[0] +
-                text +
-                line.split(QString("$TEXT"))[1];
-    if (line.contains(QString("$USERNAME")))
-        line = line.split(QString("$USERNAME"))[0] +
-                username +
-                line.split(QString("$USERNAME"))[1];
-
-    return line;
-}
-
-
 QString Reportabug::parseString(QString line)
 {
+    if (debug) qDebug() << "[Reportabug]" << "[parseString]";
+    if (debug) qDebug() << "[Reportabug]" << "[parseString]" << ":" << "Parse line" << line;
+
     if (line.contains(QString("$OWNER")))
         line = line.split(QString("$OWNER"))[0] +
                 QString(OWNER) +
@@ -135,9 +124,15 @@ QString Reportabug::parseString(QString line)
 
 QByteArray Reportabug::prepareRequest(const QString title, const QString body)
 {
+    if (debug) qDebug() << "[Reportabug]" << "[prepareRequest]";
+    if (debug) qDebug() << "[Reportabug]" << "[prepareRequest]" << ":" << "Title" << title;
+    if (debug) qDebug() << "[Reportabug]" << "[prepareRequest]" << ":" << "Title" << body;
+
     QStringList requestList;
     requestList.append(QString("\"title\":\"") + title + QString("\""));
-    requestList.append(QString("\"body\":\"") + body + QString("\""));
+    QString fixBody = body;
+    fixBody.replace(QString("\n"), QString("<br>"));
+    requestList.append(QString("\"body\":\"") + fixBody + QString("\""));
     if (!QString(TAG_ASSIGNEE).isEmpty())
         requestList.append(QString("\"assignee\":\"") + parseString(QString(TAG_ASSIGNEE)) + QString("\""));
     if (!QString(TAG_MILESTONE).isEmpty())
@@ -160,7 +155,10 @@ QByteArray Reportabug::prepareRequest(const QString title, const QString body)
 
 void Reportabug::sendReport()
 {
+    if (debug) qDebug() << "[Reportabug]" << "[sendReport]";
+
     int number = getNumberByIndex(ui->comboBox->currentIndex());
+
     if (number == -1)
         return;
     else if (number == 0)
@@ -172,8 +170,12 @@ void Reportabug::sendReport()
 
 void Reportabug::updateTabs(const int index)
 {
+    if (debug) qDebug() << "[Reportabug]" << "[updateTabs]";
+    if (debug) qDebug() << "[Reportabug]" << "[updateTabs]" << ":" << "Index" << index;
+
     int number = getNumberByIndex(index);
     ui->stackedWidget->setCurrentIndex(number + 1);
+
     if (number == -1)
         return;
     else if (number == 0)
@@ -185,23 +187,30 @@ void Reportabug::updateTabs(const int index)
 
 void Reportabug::updateGithubTab()
 {
+    if (debug) qDebug() << "[Reportabug]" << "[updateGithubTab]";
+
     ui->lineEdit_username->clear();
     ui->lineEdit_password->clear();
     ui->lineEdit_title->setText(QString(TAG_TITLE));
-    ui->plainTextEdit->setPlainText(QString(TAG_BODY));
+    ui->textEdit->setPlainText(QString(TAG_BODY));
 }
 
 
 void Reportabug::updateGitreportTab()
 {
-
+    if (debug) qDebug() << "[Reportabug]" << "[updateGitreportTab]";
 }
 
 
 void Reportabug::replyFinished(QNetworkReply *reply)
 {
+    if (debug) qDebug() << "[Reportabug]" << "[replyFinished]";
+    if (debug) qDebug() << "[Reportabug]" << "[replyFinished]" << ":" << "Error state" << reply->error();
+    if (debug) qDebug() << "[Reportabug]" << "[replyFinished]" << ":" << "Reply size" << reply->readBufferSize();
+
     int state = true;
     QString answer = reply->readAll();
+    if (debug) qDebug() << "[Reportabug]" << "[replyFinished]" << ":" << answer;
     QString messageBody, messageTitle;
     QMessageBox::Icon icon = QMessageBox::NoIcon;
     if (answer.contains(QString("\"html_url\":"))) {
@@ -255,7 +264,9 @@ void Reportabug::replyFinished(QNetworkReply *reply)
 
 void Reportabug::sendReportUsingGithub()
 {
-    // authorization
+    if (debug) qDebug() << "[Reportabug]" << "[sendReportUsingGithub]";
+
+    // authentication
     QString username = ui->lineEdit_username->text();
     QString password = ui->lineEdit_password->text();
     QString concatenated = username + QString(":") + password;
@@ -263,7 +274,7 @@ void Reportabug::sendReportUsingGithub()
     QString headerData = QString("Basic ") + userData;
     // text
     QString title = ui->lineEdit_title->text();
-    QString body = ui->plainTextEdit->toPlainText();
+    QString body = ui->textEdit->toPlainText();
     QByteArray text = prepareRequest(title, body);
     QByteArray textSize = QByteArray::number(text.size());
     // sending request
@@ -282,5 +293,5 @@ void Reportabug::sendReportUsingGithub()
 
 void Reportabug::sendReportUsingGitreport()
 {
-
+    if (debug) qDebug() << "[Reportabug]" << "[sendReportUsingGitreport]";
 }
