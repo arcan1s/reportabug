@@ -29,7 +29,11 @@ if (USE_QT5)
     include_directories (${Qt5Core_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS}
                          ${Qt5WebKit_INCLUDE_DIRS} ${Qt5WebKitWidgets_INCLUDE_DIRS}
                          ${Qt5Widgets_INCLUDE_DIRS})
-    add_executable (${SUBPROJECT} ${UI_HEADERS} ${HEADERS} ${SOURCES} ${MOC_SOURCES})
+    if (BUILD_AS_LIBRARY)
+        add_library (${SUBPROJECT} SHARED ${SOURCES} ${HEADERS} ${MOC_SOURCES})
+    else ()
+        add_executable (${SUBPROJECT} ${UI_HEADERS} ${HEADERS} ${SOURCES} ${MOC_SOURCES})
+    endif ()
     target_link_libraries (${SUBPROJECT} ${Qt5Core_LIBRARIES} ${Qt5Network_LIBRARIES}
                            ${Qt5WebKit_LIBRARIES} ${Qt5WebKitWidgets_LIBRARIES}
                            ${Qt5Widgets_LIBRARIES})
@@ -43,10 +47,18 @@ else ()
     source_group ("Source Files" FILES ${SOURCES})
     source_group ("Generated Files" FILES ${MOC_SOURCES})
 
-    add_executable (${SUBPROJECT} ${UI_HEADERS} ${HEADERS} ${SOURCES} ${MOC_SOURCES})
-    target_link_libraries (${SUBPROJECT} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} 
+    if (BUILD_AS_LIBRARY)
+        add_library (${SUBPROJECT} SHARED ${SOURCES} ${HEADERS} ${MOC_SOURCES})
+    else ()
+        add_executable (${SUBPROJECT} ${UI_HEADERS} ${HEADERS} ${SOURCES} ${MOC_SOURCES})
+    endif ()
+    target_link_libraries (${SUBPROJECT} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
                            ${QT_QTNETWORK_LIBRARY} ${QT_QTWEBKIT_LIBRARY})
 endif()
 
 # install properties
-install (TARGETS ${SUBPROJECT} DESTINATION bin)
+if (BUILD_AS_LIBRARY)
+    install (TARGETS ${SUBPROJECT} DESTINATION lib)
+else ()
+    install (TARGETS ${SUBPROJECT} DESTINATION bin)
+endif ()

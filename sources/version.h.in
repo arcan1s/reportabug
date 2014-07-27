@@ -2,10 +2,10 @@
 #define VERSION_H
 
 #define NAME "Report a Bug"
-#define VERSION "@PROJECT_VERSION@"
-#define AUTHOR "@PROJECT_AUTHOR@"
-#define EMAIL "@PROJECT_CONTACT@"
-#define LICENSE "@PROJECT_LICENSE@"
+#define VERSION "@SUBPROJECT_VERSION@"
+#define AUTHOR "@SUBPROJECT_AUTHOR@"
+#define EMAIL "@SUBPROJECT_CONTACT@"
+#define LICENSE "@SUBPROJECT_LICENSE@"
 
 #define HOMEPAGE "https://github.com/arcan1s/reportabug"
 #define REPOSITORY "https://github.com/arcan1s/reportabug"
@@ -16,6 +16,7 @@
 
 #define CMAKE_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
 #define CMAKE_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
-#define PROJECT_USE_QT5 "@USE_QT5@"
+#define SUBPROJECT_USE_QT5 "@USE_QT5@"
+#define SUBPROJECT_LIBRARY "@BUILD_AS_LIBRARY@"
 
 #endif /* VERSION_H */

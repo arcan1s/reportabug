@@ -8,22 +8,23 @@ cmake_policy (SET CMP0015 NEW)
 project (reportabug)
 
 set (SUBPROJECT reportabug)
-set (PROJECT_AUTHOR "Evgeniy Alekseev")
-set (PROJECT_CONTACT "esalexeev@gmail.com")
-set (PROJECT_LICENSE "GPLv3")
-set (PROJECT_VERSION_MAJOR 1)
-set (PROJECT_VERSION_MINOR 0)
-set (PROJECT_VERSION_PATCH 0)
-set (PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+set (SUBPROJECT_AUTHOR "Evgeniy Alekseev")
+set (SUBPROJECT_CONTACT "esalexeev@gmail.com")
+set (SUBPROJECT_LICENSE "LGPLv3")
+set (SUBPROJECT_VERSION_MAJOR 1)
+set (SUBPROJECT_VERSION_MINOR 0)
+set (SUBPROJECT_VERSION_PATCH 0)
+set (SUBPROJECT_VERSION ${SUBPROJECT_VERSION_MAJOR}.${SUBPROJECT_VERSION_MINOR}.${SUBPROJECT_VERSION_PATCH})
 string (TIMESTAMP CURRENT_DATE "%Y-%m-%d %H:%M" UTC)
 string (TIMESTAMP CURRENT_YEAR "%Y")
 
 message (STATUS "Subproject: ${SUBPROJECT}")
-message (STATUS "Version: ${PROJECT_VERSION}")
+message (STATUS "Version: ${SUBPROJECT_VERSION}")
 message (STATUS "Build date: ${CURRENT_DATE}")
 
 # install options
 option (USE_QT5 "Use Qt5 instead of Qt4" ON)
+option (BUILD_AS_LIBRARY "Build the application as a shared library" ON)
 
 # flags
 if (CMAKE_COMPILER_IS_GNUCXX)
@@ -50,4 +51,6 @@ set (HEADERS "")
 
 add_subdirectory (${SUBPROJECT_SOURCE_DIR})
 
-install (FILES ${SUBPROJECT}.desktop DESTINATION share/applications/)
+if (NOT BUILD_AS_LIBRARY)
+    install (FILES ${SUBPROJECT}.desktop DESTINATION share/applications/)
+endif ()
