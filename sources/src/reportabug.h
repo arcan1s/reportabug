@@ -15,18 +15,46 @@
  * License along with this library.                                        *
  ***************************************************************************/
 
+#ifndef REPORTABUG_H
+#define REPORTABUG_H
 
-#include <QApplication>
-
-#include "reportabug.h"
-#include "version.h"
+#include <QKeyEvent>
+#include <QMainWindow>
 
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-
-    Reportabug w;
-    w.show();
-    return a.exec();
+namespace Ui {
+class Reportabug;
 }
+
+class Reportabug : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit Reportabug(QWidget *parent = 0);
+    ~Reportabug();
+
+public slots:
+    // send report
+    void sendReport();
+    // update functions
+    void updateTabs(const int index);
+    void updateGithubTab();
+    void updateGitreportTab();
+
+private slots:
+    void sendReportUsingGithub();
+    void sendReportUsingGitreport();
+
+private:
+    Ui::Reportabug *ui;
+    void createActions();
+    void createComboBox();
+    int getNumberByIndex(const int index);
+    // ESC pressed event
+    void keyPressEvent(QKeyEvent *pressedKey);
+    QString parseString(QString line);
+};
+
+
+#endif /* REPORTABUG_H */

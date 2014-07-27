@@ -10,11 +10,10 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../
                      ${CMAKE_CURRENT_BINARY_DIR})
 
 if (USE_QT5)
-    find_package(Qt5Core REQUIRED)
-    find_package(Qt5Widgets REQUIRED)
-    add_definitions(${Qt5Core_DEFINITIONS})
-    add_definitions(${Qt5Widgets_DEFINITIONS})
-    add_definitions(${Qt5LinguistTools_DEFINITIONS})
+    find_package (Qt5Core REQUIRED)
+    find_package (Qt5Widgets REQUIRED)
+    add_definitions (${Qt5Core_DEFINITIONS})
+    add_definitions (${Qt5Widgets_DEFINITIONS})
     qt5_wrap_cpp (MOC_SOURCES ${HEADERS})
     qt5_wrap_ui (UI_HEADERS ${FORMS})
 
