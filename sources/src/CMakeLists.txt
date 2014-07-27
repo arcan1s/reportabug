@@ -5,17 +5,20 @@ file (GLOB FORMS *.ui)
 
 # include_path
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../
-                     ${CMAKE_SOURCE_DIR}
-                     ${CMAKE_BINARY_DIR}
+                     ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
                      ${CMAKE_CURRENT_BINARY_DIR})
 
 if (USE_QT5)
     find_package (Qt5Core REQUIRED)
-    find_package (Qt5Widgets REQUIRED)
     find_package (Qt5Network REQUIRED)
+    find_package (Qt5WebKit REQUIRED)
+    find_package (Qt5WebKitWidgets REQUIRED)
+    find_package (Qt5Widgets REQUIRED)
     add_definitions (${Qt5Core_DEFINITIONS})
-    add_definitions (${Qt5Widgets_DEFINITIONS})
     add_definitions (${Qt5Network_DEFINITIONS})
+    add_definitions (${Qt5WebKit_DEFINITIONS})
+    add_definitions (${Qt5WebKitWidgets_DEFINITIONS})
+    add_definitions (${Qt5Widgets_DEFINITIONS})
     qt5_wrap_cpp (MOC_SOURCES ${HEADERS})
     qt5_wrap_ui (UI_HEADERS ${FORMS})
 
@@ -23,11 +26,15 @@ if (USE_QT5)
     source_group ("Source Files" FILES ${SOURCES})
     source_group ("Generated Files" FILES ${MOC_SOURCES})
 
-    include_directories (${Qt5Core_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS})
+    include_directories (${Qt5Core_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS}
+                         ${Qt5WebKit_INCLUDE_DIRS} ${Qt5WebKitWidgets_INCLUDE_DIRS}
+                         ${Qt5Widgets_INCLUDE_DIRS})
     add_executable (${SUBPROJECT} ${UI_HEADERS} ${HEADERS} ${SOURCES} ${MOC_SOURCES})
-    target_link_libraries (${SUBPROJECT} ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Network_LIBRARIES})
+    target_link_libraries (${SUBPROJECT} ${Qt5Core_LIBRARIES} ${Qt5Network_LIBRARIES}
+                           ${Qt5WebKit_LIBRARIES} ${Qt5WebKitWidgets_LIBRARIES}
+                           ${Qt5Widgets_LIBRARIES})
 else ()
-    find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
+    find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork QtWebKit REQUIRED)
     include (${QT_USE_FILE})
     qt4_wrap_cpp (MOC_SOURCES ${HEADERS})
     qt4_wrap_ui (UI_HEADERS ${FORMS})
@@ -37,7 +44,8 @@ else ()
     source_group ("Generated Files" FILES ${MOC_SOURCES})
 
     add_executable (${SUBPROJECT} ${UI_HEADERS} ${HEADERS} ${SOURCES} ${MOC_SOURCES})
-    target_link_libraries (${SUBPROJECT} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTNETWORK_LIBRARY})
+    target_link_libraries (${SUBPROJECT} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} 
+                           ${QT_QTNETWORK_LIBRARY} ${QT_QTWEBKIT_LIBRARY})
 endif()
 
 # install properties
