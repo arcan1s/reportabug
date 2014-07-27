@@ -1,0 +1,64 @@
+Ver.1.2.0:
++ [all] added icons
++ [all] added support of netctl-auto
++ [dataengine] added debug information (NETCTLGUI_DEBUG=yes)
++ [gui] added support of macvlan
++ [gui] added ability to remove profile
++ [gui] added support of hidden wifi network
++ [gui] added contextual menu to tables
++ [gui] added actions menu
++ [gui] added clear() function to profileTab
++ [gui] added about window
++ [gui] more command line options
++ [gui] added workaround for wireless-wep example
++ [gui] added shell completions
++ [lib] detached backend from frontend
++ [lib] added error checking
++ [lib] added doxygen documentation
++ [plasmoid] added dataengine configuration
++ [plasmoid] added about window
++ [plasmoid] added debug information (NETCTLGUI_DEBUG=yes)
+- [gui] fix possible segfaults with null arrays (#5)
+* [all] changes in the project architecture
+* [all] refactoring
+* [gui] more debug information
+* [gui] changed lineEdit_profile to comboBox
+* [gui] refactoring of configuration interface
+* [gui] changed setting of the interface to profile tab
+* [gui] rewrited ErrorWindow class
+* [lib] more debug information
+* [lib] rewrited getSettingsFromProfile() function
+* [plasmoid] edited configuration interface
+* [plasmoid] changed double click event to click event
+
+Ver.1.1.0 (netctl-1.7 update):
++ [gui] added frequency
++ [plasmoid] added menu title
+* [dataengine] changed definition if profile is enabled
+* [gui] changed definition if profile is enabled
+
+Ver.1.0.6:
+* [gui] fix error checking
+
+Ver.1.0.5:
++ [plasmoid] added "Start WiFi menu" function
+* [plasmoid] refactoring
+* [plasmoid] edited icon
+
+Ver.1.0.4:
++ [gui] added Qt5 gui (by default)
++ [plasmoid] added notifications
+* [plasmoid] fix run command with sudo from plasmoid
+
+Ver.1.0.3:
++ [plasmoid] edited russian translation
+* [all] refactoring
+
+Ver.1.0.2:
+* [plasmoid] fix layout margins
+
+Ver.1.0.1:
+- [all] removed scripts
+
+Ver.1.0:
+First release

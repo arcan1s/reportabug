@@ -1,0 +1,21 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+#define NAME "Report a Bug"
+#define VERSION "@PROJECT_VERSION@"
+#define AUTHOR "@PROJECT_AUTHOR@"
+#define EMAIL "@PROJECT_CONTACT@"
+#define LICENSE "@PROJECT_LICENSE@"
+
+#define HOMEPAGE "https://github.com/arcan1s/reportabug"
+#define REPOSITORY "https://github.com/arcan1s/reportabug"
+#define BUGTRACKER "https://github.com/arcan1s/reportabug/issues"
+
+#define BUILD_DATE "@CURRENT_DATE@"
+#define DATE "2014-@CURRENT_YEAR@"
+
+#define CMAKE_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
+#define CMAKE_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
+#define PROJECT_USE_QT5 "@USE_QT5@"
+
+#endif /* VERSION_H */

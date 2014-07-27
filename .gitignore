@@ -26,3 +26,11 @@ Makefile*
 # QtCreator
 
 *.autosave
+
+# build
+build
+usr
+
+# archives
+*.tar.xz
+*.tar.gz
