@@ -22,6 +22,8 @@
 #include <QMainWindow>
 
 
+class QNetworkReply;
+
 namespace Ui {
 class Reportabug;
 }
@@ -45,6 +47,7 @@ public slots:
 private slots:
     void sendReportUsingGithub();
     void sendReportUsingGitreport();
+    void replyFinished(QNetworkReply *reply);
 
 private:
     Ui::Reportabug *ui;
@@ -53,7 +56,12 @@ private:
     int getNumberByIndex(const int index);
     // ESC pressed event
     void keyPressEvent(QKeyEvent *pressedKey);
+    QString parseCmd(QString line,
+                     const QString password = QString(),
+                     const QString text = QString(),
+                     const QString username = QString());
     QString parseString(QString line);
+    QByteArray prepareRequest(const QString title, const QString body);
 };
 
 

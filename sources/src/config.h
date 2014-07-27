@@ -41,12 +41,12 @@
 #define TAG_ASSIGNEE "$OWNER"
 #define TAG_MILESTONE ""
 // comma separated
-#define TAG_LABELS "auto"
+#define TAG_LABELS "auto,bug"
 
 /*
  * configuration of creating an issue using GitReports
  *
- * please, visit the following site: https://gitreports.com/
+ * please, visit https://gitreports.com/
  * and set up it for your repository
  */
 // enable this function
