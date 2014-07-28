@@ -29,7 +29,7 @@ Send issue over GitHub
 
 User should type own username and password. [GitHub API](https://developer.github.com/v3/issues/) is used for creating issue. The typical POST request is
 
-        curl -X POST -u user:pass -d '{"title":"A new bug","body":"Some error occurs"}' https://api.github.com/repos/owner/repo/issues
+    curl -X POST -u user:pass -d '{"title":"A new bug","body":"Some error occurs"}' https://api.github.com/repos/owner/repo/issues
 
 Available variables:
 
