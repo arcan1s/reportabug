@@ -20,19 +20,12 @@
 
 
 /*
- * configuration of creating an issue using GitHub API
+ * main configuration
  */
-// enable this function
-#define ENABLE_GITHUB true
-// combobox text
-#define GITHUB_COMBOBOX "I want to report a bug using my GitHub account"
 // the owner of the source repository
 #define OWNER "arcan1s"
 // project name
 #define PROJECT "reportabug"
-// issues url; in the most cases do not touch it
-// available tags are $PROJECT, $OWNER
-#define ISSUES_URL "https://api.github.com/repos/$OWNER/$PROJECT/issues"
 // tags defaults
 #define TAG_TITLE "A new bug"
 #define TAG_BODY "Some error occurs"
@@ -42,6 +35,17 @@
 #define TAG_MILESTONE ""
 // comma separated
 #define TAG_LABELS "auto,bug"
+
+/*
+ * configuration of creating an issue using GitHub API
+ */
+// enable this function
+#define ENABLE_GITHUB true
+// combobox text
+#define GITHUB_COMBOBOX "I want to report a bug using my GitHub account"
+// issues url; in the most cases do not touch it
+// available tags are $PROJECT, $OWNER
+#define ISSUES_URL "https://api.github.com/repos/$OWNER/$PROJECT/issues"
 
 /*
  * configuration of creating an issue using GitReports
@@ -56,6 +60,10 @@
 // public link; in the most cases do not touch it
 // available tags are $PROJECT, $OWNER
 #define PUBLIC_URL "https://gitreports.com/issue/$OWNER/$PROJECT"
+// captcha
+#define CAPTCHA_KEY "7f6ef90bce7389088a52c5c9101aad206b21b56d"
+#define CAPTCHA_TEXT "QJNZXY"
+#define CAPTCHA_TIME "1406531273"
 
 
 #endif /* CONFIG_H */

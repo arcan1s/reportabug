@@ -38,17 +38,15 @@ public:
     ~Reportabug();
 
 public slots:
-    // send report
     void sendReport();
-    // update functions
-    void updateTabs(const int index);
-    void updateGithubTab();
-    void updateGitreportTab();
-
-private slots:
     void sendReportUsingGithub();
     void sendReportUsingGitreport();
-    void replyFinished(QNetworkReply *reply);
+    void updateTabs(const int index);
+
+private slots:
+    void githubFinished(QNetworkReply *reply);
+    void gitreportFinished(const bool state);
+    void gitreportLoaded(const bool state);
 
 private:
     bool debug;

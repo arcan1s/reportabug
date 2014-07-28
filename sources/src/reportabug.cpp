@@ -25,6 +25,8 @@
 #include <QNetworkRequest>
 #include <QPushButton>
 #include <QUrl>
+#include <QWebElement>
+#include <QWebFrame>
 
 #include "config.h"
 
@@ -174,39 +176,50 @@ void Reportabug::updateTabs(const int index)
     if (debug) qDebug() << "[Reportabug]" << "[updateTabs]" << ":" << "Index" << index;
 
     int number = getNumberByIndex(index);
-    ui->stackedWidget->setCurrentIndex(number + 1);
 
-    if (number == -1)
-        return;
-    else if (number == 0)
-        updateGithubTab();
-    else if (number == 1)
-        updateGitreportTab();
+    if (number == -1) {
+        ui->widget_auth->setHidden(true);
+        ui->widget_title->setHidden(true);
+        ui->textEdit->setHidden(true);
+        ui->webView->setHidden(true);
+    }
+    else if (number == 0) {
+        ui->widget_auth->setHidden(false);
+        ui->widget_title->setHidden(false);
+        ui->textEdit->setHidden(false);
+        ui->webView->setHidden(true);
+        ui->label_password->setText(QApplication::translate("Reportabug", "Password"));
+        ui->label_password->setToolTip(QApplication::translate("Reportabug", "GitHub account password"));
+        ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "password"));
+        ui->lineEdit_password->setEchoMode(QLineEdit::Password);
+
+        ui->lineEdit_username->clear();
+        ui->lineEdit_password->clear();
+        ui->lineEdit_title->setText(QString(TAG_TITLE));
+        ui->textEdit->setPlainText(QString(TAG_BODY));
+    }
+    else if (number == 1) {
+        ui->widget_auth->setHidden(true);
+        ui->widget_title->setHidden(true);
+        ui->textEdit->setHidden(true);
+        ui->webView->setHidden(true);
+
+        ui->lineEdit_username->clear();
+        ui->lineEdit_password->clear();
+        ui->textEdit->setPlainText(QString(TAG_BODY));
+        ui->webView->load(QUrl(parseString(QString(PUBLIC_URL))));
+        disconnect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
+        disconnect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportFinished(bool)));
+        connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
+    }
 }
 
 
-void Reportabug::updateGithubTab()
+void Reportabug::githubFinished(QNetworkReply *reply)
 {
-    if (debug) qDebug() << "[Reportabug]" << "[updateGithubTab]";
-
-    ui->lineEdit_username->clear();
-    ui->lineEdit_password->clear();
-    ui->lineEdit_title->setText(QString(TAG_TITLE));
-    ui->textEdit->setPlainText(QString(TAG_BODY));
-}
-
-
-void Reportabug::updateGitreportTab()
-{
-    if (debug) qDebug() << "[Reportabug]" << "[updateGitreportTab]";
-}
-
-
-void Reportabug::replyFinished(QNetworkReply *reply)
-{
-    if (debug) qDebug() << "[Reportabug]" << "[replyFinished]";
-    if (debug) qDebug() << "[Reportabug]" << "[replyFinished]" << ":" << "Error state" << reply->error();
-    if (debug) qDebug() << "[Reportabug]" << "[replyFinished]" << ":" << "Reply size" << reply->readBufferSize();
+    if (debug) qDebug() << "[Reportabug]" << "[githubFinished]";
+    if (debug) qDebug() << "[Reportabug]" << "[githubFinished]" << ":" << "Error state" << reply->error();
+    if (debug) qDebug() << "[Reportabug]" << "[githubFinished]" << ":" << "Reply size" << reply->readBufferSize();
 
     int state = true;
     QString answer = reply->readAll();
@@ -249,6 +262,79 @@ void Reportabug::replyFinished(QNetworkReply *reply)
     QGridLayout *layout = (QGridLayout *)messageBox.layout();
     layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
     int ret = messageBox.exec();
+
+    switch (ret) {
+    case QMessageBox::Ok:
+        if (state) close();
+        break;
+    case QMessageBox::Retry:
+        if (state) updateTabs(ui->comboBox->currentIndex());
+        break;
+    default:
+        break;
+    }
+}
+
+
+void Reportabug::gitreportLoaded(const bool state)
+{
+    if (debug) qDebug() << "[Reportabug]" << "[gitreportLoaded]";
+    if (debug) qDebug() << "[Reportabug]" << "[gitreportLoaded]" << ":" << "State" << state;
+
+    if (state) {
+        ui->widget_auth->setHidden(false);
+        ui->widget_title->setHidden(true);
+        ui->textEdit->setHidden(false);
+        ui->webView->setHidden(false);
+        ui->label_password->setText(QApplication::translate("Reportabug", "Email"));
+        ui->label_password->setToolTip(QApplication::translate("Reportabug", "Your email"));
+        ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "email"));
+        ui->lineEdit_password->setEchoMode(QLineEdit::Normal);
+    }
+    else {
+        QMessageBox messageBox;
+        messageBox.setText(QApplication::translate("Reportabug", "Error!"));
+        messageBox.setInformativeText(QApplication::translate("Reportabug", "An error occurs"));
+        messageBox.setIcon(QMessageBox::Critical);
+        messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Retry);
+        messageBox.setDefaultButton(QMessageBox::Ok);
+        QSpacerItem *horizontalSpacer = new QSpacerItem(400, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        QGridLayout *layout = (QGridLayout *)messageBox.layout();
+        layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
+        messageBox.exec();
+    }
+}
+
+
+void Reportabug::gitreportFinished(const bool state)
+{
+    if (debug) qDebug() << "[Reportabug]" << "[gitreportFinished]";
+    if (debug) qDebug() << "[Reportabug]" << "[gitreportFinished]" << ":" << "State" << state;
+
+    QString messageBody, messageTitle;
+    QMessageBox::Icon icon = QMessageBox::NoIcon;
+    if (state) {
+        messageBody += QApplication::translate("Reportabug", "Message has been sended");
+        messageTitle = QApplication::translate("Reportabug", "Done!");
+        icon = QMessageBox::Information;
+    }
+    else {
+        messageBody += QApplication::translate("Reportabug", "An error occurs");
+        messageTitle = QApplication::translate("Reportabug", "Error!");
+        icon = QMessageBox::Critical;
+    }
+
+    QMessageBox messageBox;
+    messageBox.setText(messageTitle);
+    messageBox.setInformativeText(messageBody);
+    messageBox.setIcon(icon);
+    messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Retry);
+    messageBox.setDefaultButton(QMessageBox::Ok);
+    QSpacerItem *horizontalSpacer = new QSpacerItem(400, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    QGridLayout *layout = (QGridLayout *)messageBox.layout();
+    layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
+    int ret = messageBox.exec();
+
     switch (ret) {
     case QMessageBox::Ok:
         if (state) close();
@@ -287,11 +373,37 @@ void Reportabug::sendReportUsingGithub()
     request.setRawHeader("Content-Length", textSize);
     QNetworkAccessManager *manager = new QNetworkAccessManager;
     manager->post(request, text);
-    connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(replyFinished(QNetworkReply *)));
+    disconnect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(githubFinished(QNetworkReply *)));
+    connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(githubFinished(QNetworkReply *)));
 }
 
 
 void Reportabug::sendReportUsingGitreport()
 {
     if (debug) qDebug() << "[Reportabug]" << "[sendReportUsingGitreport]";
+
+    QWebElement document = ui->webView->page()->mainFrame()->documentElement();
+    QWebElement captcha = document.findFirst(QString("input#captcha"));
+    QWebElement captchaImg = document.findFirst(QString("img#[alt=captcha]"));
+    QWebElement captchaKey = document.findFirst(QString("input#captcha_key"));
+    QWebElement emailInput = document.findFirst(QString("input#email"));
+    QWebElement textArea = document.findFirst(QString("textarea#details"));
+    QWebElement usernameInput = document.findFirst(QString("input#name"));
+
+    // input
+    usernameInput.setAttribute(QString("value"), ui->lineEdit_username->text());
+    emailInput.setAttribute(QString("value"), ui->lineEdit_password->text());
+    textArea.setPlainText(ui->textEdit->toPlainText());
+    // captcha
+    captchaImg.setAttribute(QString("src"), QString("/simple_captcha?code=%1&amp;time=%2")
+                            .arg(QString(CAPTCHA_KEY))
+                            .arg(QString(CAPTCHA_TIME)));
+    captchaKey.setAttribute(QString("value"), QString(CAPTCHA_KEY));
+    captcha.setAttribute(QString("value"), QString(CAPTCHA_TEXT));
+
+    // send request
+    document.findFirst(QString("input[name=commit]")).evaluateJavaScript("this.click()");
+    disconnect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
+    disconnect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportFinished(bool)));
+    connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportFinished(bool)));
 }
