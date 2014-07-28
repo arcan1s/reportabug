@@ -78,19 +78,32 @@ Make dependencies
 Installation
 ------------
 
+### Build as a single application ###
+
 * download sources
-* extract it and install the application:
+* extract it and set up your configuration
+* install the application:
 
         cd /path/to/extracted/archive
         mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ../
+        cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_AS_LIBRARY:BOOL=0 ../
         make
         sudo make install
 
-  Available cmake flags:
+### Add to your project ###
 
-  * `-DBUILD_AS_LIBRARY:BOOL=0` - build the application but not a shared library
-  * `-DUSE_QT5:BOOL=0` - use Qt4 instead of Qt5 for GUI
+* download sources
+* extract it and set up your configuration
+* include it into your project. For example if you use `cmake` just add the following line into `CMakeLists.txt`:
+
+        add_subdirectory (reportabug)
+
+* link your application with this library
+
+### Available cmake flags ###
+
+* `-DBUILD_AS_LIBRARY:BOOL=0` - build the application but not a shared library
+* `-DUSE_QT5:BOOL=0` - use Qt4 instead of Qt5 for GUI
 
 Additional information
 ======================
