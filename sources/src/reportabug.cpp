@@ -14,6 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public        *
  * License along with this library.                                        *
  ***************************************************************************/
+/**
+ * @file reportabug.cpp
+ * Source code of reportabug
+ * @author Evgeniy Alekseev
+ * @copyright LGPLv3
+ * @bug https://github.com/arcan1s/reportabug/issues
+ */
 
 #include "reportabug.h"
 #include "ui_reportabug.h"
@@ -31,6 +38,12 @@
 #include "version.h"
 
 
+/**
+ * @class Reportabug
+ */
+/**
+ * @fn Reportabug
+ */
 Reportabug::Reportabug(QWidget *parent, bool debugCmd)
     : QMainWindow(parent),
       debug(debugCmd),
@@ -43,6 +56,9 @@ Reportabug::Reportabug(QWidget *parent, bool debugCmd)
 }
 
 
+/**
+ * @fn ~Reportabug
+ */
 Reportabug::~Reportabug()
 {
     if (debug) qDebug() << "[Reportabug]" << "[~Reportabug]";
@@ -57,6 +73,9 @@ Reportabug::~Reportabug()
 }
 
 
+/**
+ * @fn externalUpdateTab
+ */
 void Reportabug::externalUpdateTab()
 {
     if (debug) qDebug() << "[Reportabug]" << "[externalUpdateTab]";
@@ -65,6 +84,9 @@ void Reportabug::externalUpdateTab()
 }
 
 
+/**
+ * @fn createActions
+ */
 void Reportabug::createActions()
 {
     if (debug) qDebug() << "[Reportabug]" << "[createActions]";
@@ -75,6 +97,9 @@ void Reportabug::createActions()
 }
 
 
+/**
+ * @fn createComboBox
+ */
 void Reportabug::createComboBox()
 {
     if (debug) qDebug() << "[Reportabug]" << "[createComboBox]";
@@ -87,6 +112,9 @@ void Reportabug::createComboBox()
 }
 
 
+/**
+ * @fn getNumberByIndex
+ */
 int Reportabug::getNumberByIndex(const int index)
 {
     if (debug) qDebug() << "[Reportabug]" << "[getNumberByIndex]";
@@ -110,6 +138,9 @@ int Reportabug::getNumberByIndex(const int index)
 }
 
 
+/**
+ * @fn initModules
+ */
 void Reportabug::initModules()
 {
     if (debug) qDebug() << "[Reportabug]" << "[initModules]";
@@ -130,6 +161,9 @@ void Reportabug::initModules()
 }
 
 
+/**
+ * @fn keyPressEvent
+ */
 void Reportabug::keyPressEvent(QKeyEvent *pressedKey)
 {
     if (debug) qDebug() << "[Reportabug]" << "[keyPressEvent]";
@@ -139,6 +173,9 @@ void Reportabug::keyPressEvent(QKeyEvent *pressedKey)
 }
 
 
+/**
+ * @fn parseString
+ */
 QString Reportabug::parseString(QString line)
 {
     if (debug) qDebug() << "[Reportabug]" << "[parseString]";
@@ -157,6 +194,9 @@ QString Reportabug::parseString(QString line)
 }
 
 
+/**
+ * @fn sendReport
+ */
 void Reportabug::sendReport()
 {
     if (debug) qDebug() << "[Reportabug]" << "[sendReport]";
@@ -181,6 +221,9 @@ void Reportabug::sendReport()
 }
 
 
+/**
+ * @fn showWindow
+ */
 void Reportabug::showWindow()
 {
     externalUpdateTab();
@@ -188,6 +231,9 @@ void Reportabug::showWindow()
 }
 
 
+/**
+ * @fn updateTabs
+ */
 void Reportabug::updateTabs(const int index)
 {
     if (debug) qDebug() << "[Reportabug]" << "[updateTabs]";

@@ -14,6 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public        *
  * License along with this library.                                        *
  ***************************************************************************/
+/**
+ * @file main.cpp
+ * Source code of reportabug
+ * @author Evgeniy Alekseev
+ * @copyright LGPLv3
+ * @bug https://github.com/arcan1s/reportabug/issues
+ */
 
 
 #include <QApplication>
@@ -21,8 +28,13 @@
 #include "reportabug.h"
 #include "version.h"
 
-
+/**
+ * @fn main
+ */
 int main(int argc, char *argv[])
+/**
+ * @return QApplication.exec()
+ */
 {
     QApplication a(argc, argv);
 

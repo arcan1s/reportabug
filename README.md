@@ -60,8 +60,9 @@ Dependencies
 
 ### Optional dependencies ###
 
-* qt5-network (if Qt5 is used) (*requires for GitHub module*)
-* qt5-webkit (if Qt5 is used) or qtwebkit (if Qt4 is used) (*requires for GitReport module*)
+* qt5-network (if Qt5 is used) *(requires for GitHub module)*
+* qt5-webkit (if Qt5 is used) or qtwebkit (if Qt4 is used) *(requires for GitReport module)*
+* doxygen *(developers documentation)*
 
 ### Make dependencies ###
 
@@ -101,7 +102,7 @@ Installation
 ### Available cmake flags ###
 
 * `-DBUILD_AS_LIBRARY:BOOL=0` - build the application but not a shared library
-* `-DBUILD_DOCS:BOOL=0` - do not build developer documentation
+* `-DBUILD_DOCS:BOOL=1` - build developer documentation
 * `-DENABLE_GITHUB=0` - disable GitHub module
 * `-DENABLE_GITREPORT=0` - disable GitReport module
 * `-DUSE_QT5:BOOL=0` - use Qt4 instead of Qt5 for GUI

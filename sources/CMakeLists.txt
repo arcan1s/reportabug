@@ -25,6 +25,7 @@ message (STATUS "Build date: ${CURRENT_DATE}")
 # install options
 option (USE_QT5 "Use Qt5 instead of Qt4" ON)
 option (BUILD_AS_LIBRARY "Build the application as a shared library" ON)
+option (BUILD_DOCS "Build developers documentation" OFF)
 option (ENABLE_GITHUB "Enable GitHub module" ON)
 option (ENABLE_GITREPORT "Enable GitReport module" ON)
 
@@ -53,6 +54,9 @@ set (HEADERS "")
 
 add_subdirectory (${SUBPROJECT_SOURCE_DIR})
 
+if (BUILD_DOCS)
+    include (docs.cmake)
+endif ()
 if (NOT BUILD_AS_LIBRARY)
     install (FILES ${SUBPROJECT}.desktop DESTINATION share/applications/)
 endif ()

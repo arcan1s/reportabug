@@ -14,6 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public        *
  * License along with this library.                                        *
  ***************************************************************************/
+/**
+ * @file gitreportmodule.cpp
+ * Source code of reportabug
+ * @author Evgeniy Alekseev
+ * @copyright LGPLv3
+ * @bug https://github.com/arcan1s/reportabug/issues
+ */
 
 #include "gitreportmodule.h"
 #include "reportabug.h"
@@ -30,6 +37,12 @@
 #include "config.h"
 
 
+/**
+ * @class GitreportModule
+ */
+/**
+ * @fn GitreportModule
+ */
 GitreportModule::GitreportModule(QWidget *parent, bool debugCmd)
     : QObject(parent),
       debug(debugCmd),
@@ -39,6 +52,9 @@ GitreportModule::GitreportModule(QWidget *parent, bool debugCmd)
 }
 
 
+/**
+ * @fn ~GitreportModule
+ */
 GitreportModule::~GitreportModule()
 {
     if (debug) qDebug() << "[GitreportModule]" << "[~GitreportModule]";
@@ -47,6 +63,9 @@ GitreportModule::~GitreportModule()
 }
 
 
+/**
+ * @fn sendReportUsingGitreport
+ */
 void GitreportModule::sendReportUsingGitreport(const QMap<QString, QString> info)
 {
     if (debug) qDebug() << "[GitreportModule]" << "[sendReportUsingGitreport]";
@@ -78,6 +97,9 @@ void GitreportModule::sendReportUsingGitreport(const QMap<QString, QString> info
 }
 
 
+/**
+ * @fn gitreportLoaded
+ */
 void GitreportModule::gitreportLoaded(const bool state)
 {
     if (debug) qDebug() << "[GitreportModule]" << "[gitreportLoaded]";
@@ -100,6 +122,9 @@ void GitreportModule::gitreportLoaded(const bool state)
 }
 
 
+/**
+ * @fn gitreportFinished
+ */
 void GitreportModule::gitreportFinished(const bool state)
 {
     if (debug) qDebug() << "[GitreportModule]" << "[gitreportFinished]";

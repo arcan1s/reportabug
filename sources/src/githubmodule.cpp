@@ -14,6 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public        *
  * License along with this library.                                        *
  ***************************************************************************/
+/**
+ * @file githubmodule.cpp
+ * Source code of reportabug
+ * @author Evgeniy Alekseev
+ * @copyright LGPLv3
+ * @bug https://github.com/arcan1s/reportabug/issues
+ */
 
 #include "githubmodule.h"
 #include "reportabug.h"
@@ -31,6 +38,12 @@
 #include "config.h"
 
 
+/**
+ * @class GithubModule
+ */
+/**
+ * @fn GithubModule
+ */
 GithubModule::GithubModule(QWidget *parent, bool debugCmd)
     : QObject(parent),
       debug(debugCmd),
@@ -39,12 +52,18 @@ GithubModule::GithubModule(QWidget *parent, bool debugCmd)
 }
 
 
+/**
+ * @fn ~GithubModule
+ */
 GithubModule::~GithubModule()
 {
     if (debug) qDebug() << "[GithubModule]" << "[~GithubModule]";
 }
 
 
+/**
+ * @fn prepareRequest
+ */
 QByteArray GithubModule::prepareRequest(const QString title, const QString body)
 {
     if (debug) qDebug() << "[GithubModule]" << "[prepareRequest]";
@@ -76,6 +95,9 @@ QByteArray GithubModule::prepareRequest(const QString title, const QString body)
 }
 
 
+/**
+ * @fn parseString
+ */
 QString GithubModule::parseString(QString line)
 {
     if (debug) qDebug() << "[GithubModule]" << "[parseString]";
@@ -94,6 +116,9 @@ QString GithubModule::parseString(QString line)
 }
 
 
+/**
+ * @fn sendReportUsingGithub
+ */
 void GithubModule::sendReportUsingGithub(const QMap<QString, QString> info)
 {
     if (debug) qDebug() << "[GithubModule]" << "[sendReportUsingGithub]";
@@ -120,6 +145,9 @@ void GithubModule::sendReportUsingGithub(const QMap<QString, QString> info)
 }
 
 
+/**
+ * @fn githubFinished
+ */
 void GithubModule::githubFinished(QNetworkReply *reply)
 {
     if (debug) qDebug() << "[GithubModule]" << "[githubFinished]";
