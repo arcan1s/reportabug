@@ -11,8 +11,7 @@ Configuration
 
 Edit `src/config.h` header and set up needed variables.
 
-Main configuration
-------------------
+### Main configuration ###
 
 Available variables:
 
@@ -24,8 +23,7 @@ Available variables:
 * `TAG_LABELS` - set this labels to an issue. Labels should be comma separated. It may be used only for GitHub module. This tag will work only if user has push access. If it will be empty, it will be ignored.
 * `TAG_MILESTONE` - set this milestone to an issue. It may be used only for GitHub module. This tag will work only if user has push access. If it will be empty, it will be ignored.
 
-Send issue over GitHub
-----------------------
+### Send issue over GitHub ###
 
 User should type own username and password. [GitHub API](https://developer.github.com/v3/issues/) is used for creating issue. The typical POST request is
 
@@ -39,8 +37,7 @@ Available variables:
 
 This module requires `QtNetwork` module. To enable this module set variable `ENABLE_GITHUB` to `true`.
 
-Send issue over GitReport
--------------------------
+### Send issue over GitReport ###
 
 [GitReport](https://gitreports.com/about) is used for creating issue. Please visit [this page](https://gitreports.com/) and set up it for your repository.
 
@@ -63,14 +60,12 @@ Dependencies
 
 * qt5-base (if Qt5 is used) or qt4 (if Qt4 is used)
 
-Optional dependencies
----------------------
+### Optional dependencies ###
 
 * qt5-network (if Qt5 is used) (*requires for GitHub module*)
 * qt5-webkit (if Qt5 is used) or qtwebkit (if Qt4 is used) (*requires for GitReport module*)
 
-Make dependencies
------------------
+### Make dependencies ###
 
 * automoc4
 * cmake

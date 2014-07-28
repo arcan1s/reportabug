@@ -40,7 +40,7 @@
  * configuration of creating an issue using GitHub API
  */
 // enable this function
-#define ENABLE_GITHUB true
+#cmakedefine ENABLE_GITHUB
 // combobox text
 #define GITHUB_COMBOBOX "I want to report a bug using my GitHub account"
 // issues url; in the most cases do not touch it
@@ -54,7 +54,7 @@
  * and set up it for your repository
  */
 // enable this function
-#define ENABLE_GITREPORT true
+#cmakedefine ENABLE_GITREPORT
 // combobox text
 #define GITREPORT_COMBOBOX "GitHub? I don't understand what do you want from me!"
 // public link; in the most cases do not touch it

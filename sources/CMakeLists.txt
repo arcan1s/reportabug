@@ -25,6 +25,8 @@ message (STATUS "Build date: ${CURRENT_DATE}")
 # install options
 option (USE_QT5 "Use Qt5 instead of Qt4" ON)
 option (BUILD_AS_LIBRARY "Build the application as a shared library" ON)
+option (ENABLE_GITHUB "Enable GitHub module" ON)
+option (ENABLE_GITREPORT "Enable GitReport module" ON)
 
 # flags
 if (CMAKE_COMPILER_IS_GNUCXX)

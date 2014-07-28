@@ -20,15 +20,16 @@
 
 #include <QDebug>
 #include <QMessageBox>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
 #include <QPushButton>
-#include <QUrl>
-#include <QWebElement>
-#include <QWebFrame>
 
 #include "config.h"
+#include "version.h"
+#ifdef ENABLE_GITHUB
+#include "githubmodule.cpp"
+#endif /* ENABLE_GITHUB */
+#ifdef ENABLE_GITREPORT
+#include "gitreportmodule.cpp"
+#endif /* ENABLE_GITREPORT */
 
 
 Reportabug::Reportabug(QWidget *parent, bool debugCmd)
@@ -37,9 +38,15 @@ Reportabug::Reportabug(QWidget *parent, bool debugCmd)
       ui(new Ui::Reportabug)
 {
     ui->setupUi(this);
+    // add webview which is required by gitreport module
+#ifdef ENABLE_GITREPORT
+    webView = new QWebView(this);
+    // 4 is a magic number. Seriously
+    ui->verticalLayout->insertWidget(4, webView);
+#endif /* ENABLE_GITREPORT */
+    initModules();
     createComboBox();
     createActions();
-    updateTabs(ui->comboBox->currentIndex());
 }
 
 
@@ -47,6 +54,9 @@ Reportabug::~Reportabug()
 {
     if (debug) qDebug() << "[Reportabug]" << "[~Reportabug]";
 
+#ifdef ENABLE_GITREPORT
+    delete webView;
+#endif /* ENABLE_GITREPORT */
     delete ui;
 }
 
@@ -66,9 +76,9 @@ void Reportabug::createComboBox()
     if (debug) qDebug() << "[Reportabug]" << "[createComboBox]";
 
     ui->comboBox->clear();
-    if (ENABLE_GITHUB)
+    if (modules[0])
         ui->comboBox->addItem(QString(GITHUB_COMBOBOX));
-    if (ENABLE_GITREPORT)
+    if (modules[1])
         ui->comboBox->addItem(QString(GITREPORT_COMBOBOX));
 }
 
@@ -81,13 +91,13 @@ int Reportabug::getNumberByIndex(const int index)
     if (index == -1)
         // nothing to do
         return -1;
-    else if ((ENABLE_GITHUB) && (ENABLE_GITREPORT))
+    else if ((modules[0]) && (modules[1]))
         // both are enabled
         return index;
-    else if (ENABLE_GITHUB)
+    else if (modules[0])
         // only github is enabled
         return 0;
-    else if (ENABLE_GITREPORT)
+    else if (modules[1])
         // only gitreport is enabled
         return 1;
     else
@@ -96,7 +106,22 @@ int Reportabug::getNumberByIndex(const int index)
 }
 
 
-// ESC press event
+void Reportabug::initModules()
+{
+    if (debug) qDebug() << "[Reportabug]" << "[initModules]";
+
+    modules[0] = false;
+    modules[1] = false;
+
+#ifdef ENABLE_GITHUB
+    modules[0] = true;
+#endif /* ENABLE_GITHUB */
+#ifdef ENABLE_GITREPORT
+    modules[1] = true;
+#endif /* ENABLE_GITREPORT */
+}
+
+
 void Reportabug::keyPressEvent(QKeyEvent *pressedKey)
 {
     if (debug) qDebug() << "[Reportabug]" << "[keyPressEvent]";
@@ -163,10 +188,21 @@ void Reportabug::sendReport()
 
     if (number == -1)
         return;
+#ifdef ENABLE_GITHUB
     else if (number == 0)
         sendReportUsingGithub();
+#endif /* ENABLE_GITHUB */
+#ifdef ENABLE_GITREPORT
     else if (number == 1)
         sendReportUsingGitreport();
+#endif /* ENABLE_GITREPORT */
+}
+
+
+void Reportabug::showWindow()
+{
+    updateTabs(ui->comboBox->currentIndex());
+    show();
 }
 
 
@@ -177,17 +213,20 @@ void Reportabug::updateTabs(const int index)
 
     int number = getNumberByIndex(index);
 
+    // it is out of conditional because I don't want a lot of ifdef/endif
+#ifdef ENABLE_GITREPORT
+    webView->setHidden(true);
+#endif /* ENABLE_GITREPORT */
     if (number == -1) {
         ui->widget_auth->setHidden(true);
         ui->widget_title->setHidden(true);
         ui->textEdit->setHidden(true);
-        ui->webView->setHidden(true);
     }
+#ifdef ENABLE_GITHUB
     else if (number == 0) {
         ui->widget_auth->setHidden(false);
         ui->widget_title->setHidden(false);
         ui->textEdit->setHidden(false);
-        ui->webView->setHidden(true);
         ui->label_password->setText(QApplication::translate("Reportabug", "Password"));
         ui->label_password->setToolTip(QApplication::translate("Reportabug", "GitHub account password"));
         ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "password"));
@@ -198,212 +237,20 @@ void Reportabug::updateTabs(const int index)
         ui->lineEdit_title->setText(QString(TAG_TITLE));
         ui->textEdit->setPlainText(QString(TAG_BODY));
     }
+#endif /* ENABLE_GITHUB */
+#ifdef ENABLE_GITREPORT
     else if (number == 1) {
         ui->widget_auth->setHidden(true);
         ui->widget_title->setHidden(true);
         ui->textEdit->setHidden(true);
-        ui->webView->setHidden(true);
 
         ui->lineEdit_username->clear();
         ui->lineEdit_password->clear();
         ui->textEdit->setPlainText(QString(TAG_BODY));
-        ui->webView->load(QUrl(parseString(QString(PUBLIC_URL))));
-        disconnect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
-        disconnect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportFinished(bool)));
-        connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
+        webView->load(QUrl(parseString(QString(PUBLIC_URL))));
+        disconnect(webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
+        disconnect(webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportFinished(bool)));
+        connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
     }
-}
-
-
-void Reportabug::githubFinished(QNetworkReply *reply)
-{
-    if (debug) qDebug() << "[Reportabug]" << "[githubFinished]";
-    if (debug) qDebug() << "[Reportabug]" << "[githubFinished]" << ":" << "Error state" << reply->error();
-    if (debug) qDebug() << "[Reportabug]" << "[githubFinished]" << ":" << "Reply size" << reply->readBufferSize();
-
-    int state = true;
-    QString answer = reply->readAll();
-    if (debug) qDebug() << "[Reportabug]" << "[replyFinished]" << ":" << answer;
-    QString messageBody, messageTitle;
-    QMessageBox::Icon icon = QMessageBox::NoIcon;
-    if (answer.contains(QString("\"html_url\":"))) {
-        QString url;
-        for (int i=0; i<answer.split(QChar(',')).count(); i++)
-            if (answer.split(QChar(','))[i].split(QChar(':'))[0] == QString("\"html_url\"")) {
-                url = answer.split(QChar(','))[i].split(QString("\"html_url\":"))[1].remove(QChar('"'));
-                break;
-            }
-        messageBody += QString("%1\n").arg(QApplication::translate("Reportabug", "Message has been sended"));
-        messageBody += QString("Url: %2").arg(url);
-        messageTitle = QApplication::translate("Reportabug", "Done!");
-        icon = QMessageBox::Information;
-        state = true;
-    }
-    else if (answer.contains(QString("\"Bad credentials\""))) {
-        messageBody += QApplication::translate("Reportabug", "Incorrect username or password");
-        messageTitle = QApplication::translate("Reportabug", "Error!");
-        icon = QMessageBox::Critical;
-        state = false;
-    }
-    else {
-        messageBody += QApplication::translate("Reportabug", "An error occurs");
-        messageTitle = QApplication::translate("Reportabug", "Error!");
-        icon = QMessageBox::Critical;
-        state = false;
-    }
-
-    QMessageBox messageBox;
-    messageBox.setText(messageTitle);
-    messageBox.setInformativeText(messageBody);
-    messageBox.setIcon(icon);
-    messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Retry);
-    messageBox.setDefaultButton(QMessageBox::Ok);
-    QSpacerItem *horizontalSpacer = new QSpacerItem(400, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    QGridLayout *layout = (QGridLayout *)messageBox.layout();
-    layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
-    int ret = messageBox.exec();
-
-    switch (ret) {
-    case QMessageBox::Ok:
-        if (state) close();
-        break;
-    case QMessageBox::Retry:
-        if (state) updateTabs(ui->comboBox->currentIndex());
-        break;
-    default:
-        break;
-    }
-}
-
-
-void Reportabug::gitreportLoaded(const bool state)
-{
-    if (debug) qDebug() << "[Reportabug]" << "[gitreportLoaded]";
-    if (debug) qDebug() << "[Reportabug]" << "[gitreportLoaded]" << ":" << "State" << state;
-
-    if (state) {
-        ui->widget_auth->setHidden(false);
-        ui->widget_title->setHidden(true);
-        ui->textEdit->setHidden(false);
-        ui->webView->setHidden(false);
-        ui->label_password->setText(QApplication::translate("Reportabug", "Email"));
-        ui->label_password->setToolTip(QApplication::translate("Reportabug", "Your email"));
-        ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "email"));
-        ui->lineEdit_password->setEchoMode(QLineEdit::Normal);
-    }
-    else {
-        QMessageBox messageBox;
-        messageBox.setText(QApplication::translate("Reportabug", "Error!"));
-        messageBox.setInformativeText(QApplication::translate("Reportabug", "An error occurs"));
-        messageBox.setIcon(QMessageBox::Critical);
-        messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Retry);
-        messageBox.setDefaultButton(QMessageBox::Ok);
-        QSpacerItem *horizontalSpacer = new QSpacerItem(400, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-        QGridLayout *layout = (QGridLayout *)messageBox.layout();
-        layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
-        messageBox.exec();
-    }
-}
-
-
-void Reportabug::gitreportFinished(const bool state)
-{
-    if (debug) qDebug() << "[Reportabug]" << "[gitreportFinished]";
-    if (debug) qDebug() << "[Reportabug]" << "[gitreportFinished]" << ":" << "State" << state;
-
-    QString messageBody, messageTitle;
-    QMessageBox::Icon icon = QMessageBox::NoIcon;
-    if (state) {
-        messageBody += QApplication::translate("Reportabug", "Message has been sended");
-        messageTitle = QApplication::translate("Reportabug", "Done!");
-        icon = QMessageBox::Information;
-    }
-    else {
-        messageBody += QApplication::translate("Reportabug", "An error occurs");
-        messageTitle = QApplication::translate("Reportabug", "Error!");
-        icon = QMessageBox::Critical;
-    }
-
-    QMessageBox messageBox;
-    messageBox.setText(messageTitle);
-    messageBox.setInformativeText(messageBody);
-    messageBox.setIcon(icon);
-    messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Retry);
-    messageBox.setDefaultButton(QMessageBox::Ok);
-    QSpacerItem *horizontalSpacer = new QSpacerItem(400, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    QGridLayout *layout = (QGridLayout *)messageBox.layout();
-    layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
-    int ret = messageBox.exec();
-
-    switch (ret) {
-    case QMessageBox::Ok:
-        if (state) close();
-        break;
-    case QMessageBox::Retry:
-        if (state) updateTabs(ui->comboBox->currentIndex());
-        break;
-    default:
-        break;
-    }
-}
-
-
-void Reportabug::sendReportUsingGithub()
-{
-    if (debug) qDebug() << "[Reportabug]" << "[sendReportUsingGithub]";
-
-    // authentication
-    QString username = ui->lineEdit_username->text();
-    QString password = ui->lineEdit_password->text();
-    QString concatenated = username + QString(":") + password;
-    QByteArray userData = concatenated.toLocal8Bit().toBase64();
-    QString headerData = QString("Basic ") + userData;
-    // text
-    QString title = ui->lineEdit_title->text();
-    QString body = ui->textEdit->toPlainText();
-    QByteArray text = prepareRequest(title, body);
-    QByteArray textSize = QByteArray::number(text.size());
-    // sending request
-    QNetworkRequest request = QNetworkRequest(parseString(QString(ISSUES_URL)));
-    request.setRawHeader("Authorization", headerData.toLocal8Bit());
-    request.setRawHeader("User-Agent", "reportabug");
-    request.setRawHeader("Host", "api.github.com");
-    request.setRawHeader("Accept", "*/*");
-    request.setRawHeader("Content-Type", "application/vnd.github.VERSION.raw+json");
-    request.setRawHeader("Content-Length", textSize);
-    QNetworkAccessManager *manager = new QNetworkAccessManager;
-    manager->post(request, text);
-    disconnect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(githubFinished(QNetworkReply *)));
-    connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(githubFinished(QNetworkReply *)));
-}
-
-
-void Reportabug::sendReportUsingGitreport()
-{
-    if (debug) qDebug() << "[Reportabug]" << "[sendReportUsingGitreport]";
-
-    QWebElement document = ui->webView->page()->mainFrame()->documentElement();
-    QWebElement captcha = document.findFirst(QString("input#captcha"));
-    QWebElement captchaImg = document.findFirst(QString("img#[alt=captcha]"));
-    QWebElement captchaKey = document.findFirst(QString("input#captcha_key"));
-    QWebElement emailInput = document.findFirst(QString("input#email"));
-    QWebElement textArea = document.findFirst(QString("textarea#details"));
-    QWebElement usernameInput = document.findFirst(QString("input#name"));
-
-    // input
-    usernameInput.setAttribute(QString("value"), ui->lineEdit_username->text());
-    emailInput.setAttribute(QString("value"), ui->lineEdit_password->text());
-    textArea.setPlainText(ui->textEdit->toPlainText());
-    // captcha
-    captchaImg.setAttribute(QString("src"), QString("/simple_captcha?code=%1&amp;time=%2")
-                            .arg(QString(CAPTCHA_KEY))
-                            .arg(QString(CAPTCHA_TIME)));
-    captchaKey.setAttribute(QString("value"), QString(CAPTCHA_KEY));
-    captcha.setAttribute(QString("value"), QString(CAPTCHA_TEXT));
-
-    // send request
-    document.findFirst(QString("input[name=commit]")).evaluateJavaScript("this.click()");
-    disconnect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
-    disconnect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportFinished(bool)));
-    connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportFinished(bool)));
+#endif /* ENABLE_GITREPORT */
 }

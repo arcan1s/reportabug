@@ -27,6 +27,6 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     Reportabug w(0, true);
-    w.show();
+    w.showWindow();
     return a.exec();
 }

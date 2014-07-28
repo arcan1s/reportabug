@@ -21,9 +21,14 @@
 #include <QKeyEvent>
 #include <QMainWindow>
 
+#include "config.h"
 
+#ifdef ENABLE_GITHUB
 class QNetworkReply;
-
+#endif /* ENABLE_GITHUB */
+#ifdef ENABLE_GITREPORT
+class QWebView;
+#endif /* ENABLE_GITREPORT */
 namespace Ui {
 class Reportabug;
 }
@@ -39,22 +44,32 @@ public:
 
 public slots:
     void sendReport();
-    void sendReportUsingGithub();
-    void sendReportUsingGitreport();
+    void showWindow();
     void updateTabs(const int index);
 
 private slots:
+#ifdef ENABLE_GITHUB
+    void sendReportUsingGithub();
     void githubFinished(QNetworkReply *reply);
+#endif /* ENABLE_GITHUB */
+#ifdef ENABLE_GITREPORT
+    void sendReportUsingGitreport();
     void gitreportFinished(const bool state);
     void gitreportLoaded(const bool state);
+#endif /* ENABLE_GITREPORT */
 
 private:
     bool debug;
+    bool modules[2];
+#ifdef ENABLE_GITREPORT
+    // add webview which is required by gitreport module
+    QWebView *webView;
+#endif /* ENABLE_GITREPORT */
     Ui::Reportabug *ui;
     void createActions();
     void createComboBox();
     int getNumberByIndex(const int index);
-    // ESC pressed event
+    void initModules();
     void keyPressEvent(QKeyEvent *pressedKey);
     QString parseString(QString line);
     QByteArray prepareRequest(const QString title, const QString body);
