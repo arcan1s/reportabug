@@ -4,12 +4,12 @@ reportabug
 Information
 -----------
 
-A simple Qt application/library which allows users to create an issue for GitHub projects. It may work over [GitHub](https://github.com) or [GitReport](https://gitreports.com/). For the developer configuration please use `config.h` header.
+A simple Qt application/library which allows users to create an issue for GitHub projects. It may work over [GitHub](https://github.com) or [GitReport](https://gitreports.com/). For the developer configuration please use `config.h.in` header.
 
 Configuration
 -------------
 
-Edit `src/config.h` header and set up needed variables.
+Edit `src/config.h.in` header and set up needed variables.
 
 ### Main configuration ###
 
@@ -31,11 +31,10 @@ User should type own username and password. [GitHub API](https://developer.githu
 
 Available variables:
 
-* `ENABLE_GITHUB` - enable this module. Default is `true`.
 * `GITHUB_COMBOBOX` - text of this module into comboBox.
 * `ISSUES_URL` - issues url, in the most cases do not touch it. Default is `https://api.github.com/repos/$OWNER/$PROJECT/issues`. Available tags here are `$PROJECT`, `$OWNER`.
 
-This module requires `QtNetwork` module. To enable this module set variable `ENABLE_GITHUB` to `true`.
+This module requires `QtNetwork` module. To disable this module use `-DENABLE_GITHUB=0` cmake flag.
 
 ### Send issue over GitReport ###
 
@@ -46,11 +45,10 @@ Available variables:
 * `CAPTCHA_KEY` - captcha key. It may be found in the source of the `PUBLIC_URL` page. Default is `7f6ef90bce7389088a52c5c9101aad206b21b56d`.
 * `CAPTCHA_TEXT` - captcha text. It may be found in the source of the `PUBLIC_URL` page. Default is `QJNZXY`.
 * `CAPTCHA_TIME` - captcha time. It may be found in the source of the `PUBLIC_URL` page. Default is `1406531273`.
-* `ENABLE_GITREPORT` - enable this module. Default is `true`.
 * `GITREPORT_COMBOBOX` - text of this module into comboBox.
 * `PUBLIC_URL` - issues url, in the most cases do not touch it. Default is `https://gitreports.com/issue/$OWNER/$PROJECT`. Available tags here are `$PROJECT`, `$OWNER`.
 
-This module requires `QtWebKit` module. To enable this module set variable `ENABLE_GITREPORT` to `true`.
+This module requires `QtWebKit` module. To disable this module use `-DENABLE_GITREPORT=0` cmake flag.
 
 Instruction
 ===========
@@ -93,11 +91,19 @@ Installation
 
         add_subdirectory (reportabug)
 
+* declare class in you sources. For example:
+
+        Reportabug *reportWindow = new Reportabug(this, false);
+        reportWindow->showWindow();
+
 * link your application with this library
 
 ### Available cmake flags ###
 
 * `-DBUILD_AS_LIBRARY:BOOL=0` - build the application but not a shared library
+* `-DBUILD_DOCS:BOOL=0` - do not build developer documentation
+* `-DENABLE_GITHUB=0` - disable GitHub module
+* `-DENABLE_GITREPORT=0` - disable GitReport module
 * `-DUSE_QT5:BOOL=0` - use Qt4 instead of Qt5 for GUI
 
 Additional information

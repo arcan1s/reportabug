@@ -2,6 +2,14 @@
 set (SOURCES main.cpp reportabug.cpp)
 set (HEADERS reportabug.h)
 set (FORMS reportabug.ui)
+if (ENABLE_GITHUB)
+    set (SOURCES ${SOURCES} githubmodule.cpp)
+    set (HEADERS ${HEADERS} githubmodule.h)
+endif ()
+if (ENABLE_GITREPORT)
+    set (SOURCES ${SOURCES} gitreportmodule.cpp)
+    set (HEADERS ${HEADERS} gitreportmodule.h)
+endif ()
 
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 

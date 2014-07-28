@@ -15,50 +15,37 @@
  * License along with this library.                                        *
  ***************************************************************************/
 
-#ifndef REPORTABUG_H
-#define REPORTABUG_H
+#ifndef GITHUBMODULE_H
+#define GITHUBMODULE_H
 
-#include <QKeyEvent>
-#include <QMainWindow>
+#include <QMap>
+#include <QObject>
 
-#include "config.h"
 
-class GithubModule;
-class GitreportModule;
-
-namespace Ui {
 class Reportabug;
-}
+class QNetworkReply;
 
-class Reportabug : public QMainWindow
+class GithubModule : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit Reportabug(QWidget *parent = 0,
-                        bool debugCmd = false);
-    ~Reportabug();
-    void externalUpdateTab();
+    explicit GithubModule(QWidget *parent = 0,
+                          bool debugCmd = false);
+    ~GithubModule();
 
 public slots:
-    void sendReport();
-    void showWindow();
-    void updateTabs(const int index);
+    void sendReportUsingGithub(const QMap<QString, QString> info);
+
+private slots:
+    void githubFinished(QNetworkReply *reply);
 
 private:
     bool debug;
-    bool modules[2];
-    Ui::Reportabug *ui;
-    // modules
-    GithubModule *github;
-    GitreportModule *gitreport;
-    void createActions();
-    void createComboBox();
-    int getNumberByIndex(const int index);
-    void initModules();
-    void keyPressEvent(QKeyEvent *pressedKey);
+    Reportabug *mainWindow;
     QString parseString(QString line);
+    QByteArray prepareRequest(const QString title, const QString body);
 };
 
 
-#endif /* REPORTABUG_H */
+#endif /* GITHUBMODULE_H */

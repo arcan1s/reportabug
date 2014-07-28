@@ -19,17 +19,16 @@
 #include "ui_reportabug.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QPushButton>
 
 #include "config.h"
-#include "version.h"
 #ifdef ENABLE_GITHUB
-#include "githubmodule.cpp"
+#include "githubmodule.h"
 #endif /* ENABLE_GITHUB */
 #ifdef ENABLE_GITREPORT
-#include "gitreportmodule.cpp"
+#include "gitreportmodule.h"
 #endif /* ENABLE_GITREPORT */
+#include "version.h"
 
 
 Reportabug::Reportabug(QWidget *parent, bool debugCmd)
@@ -38,12 +37,6 @@ Reportabug::Reportabug(QWidget *parent, bool debugCmd)
       ui(new Ui::Reportabug)
 {
     ui->setupUi(this);
-    // add webview which is required by gitreport module
-#ifdef ENABLE_GITREPORT
-    webView = new QWebView(this);
-    // 4 is a magic number. Seriously
-    ui->verticalLayout->insertWidget(4, webView);
-#endif /* ENABLE_GITREPORT */
     initModules();
     createComboBox();
     createActions();
@@ -54,10 +47,21 @@ Reportabug::~Reportabug()
 {
     if (debug) qDebug() << "[Reportabug]" << "[~Reportabug]";
 
+#ifdef ENABLE_GITHUB
+    delete github;
+#endif /* ENABLE_GITHUB */
 #ifdef ENABLE_GITREPORT
-    delete webView;
+    delete gitreport;
 #endif /* ENABLE_GITREPORT */
     delete ui;
+}
+
+
+void Reportabug::externalUpdateTab()
+{
+    if (debug) qDebug() << "[Reportabug]" << "[externalUpdateTab]";
+
+    return updateTabs(ui->comboBox->currentIndex());
 }
 
 
@@ -115,9 +119,13 @@ void Reportabug::initModules()
 
 #ifdef ENABLE_GITHUB
     modules[0] = true;
+    github = new GithubModule(this, debug);
 #endif /* ENABLE_GITHUB */
 #ifdef ENABLE_GITREPORT
     modules[1] = true;
+    gitreport = new GitreportModule(this, debug);
+    // 4 is a magic number. Seriously
+    ui->verticalLayout->insertWidget(4, gitreport->webView);
 #endif /* ENABLE_GITREPORT */
 }
 
@@ -149,59 +157,33 @@ QString Reportabug::parseString(QString line)
 }
 
 
-QByteArray Reportabug::prepareRequest(const QString title, const QString body)
-{
-    if (debug) qDebug() << "[Reportabug]" << "[prepareRequest]";
-    if (debug) qDebug() << "[Reportabug]" << "[prepareRequest]" << ":" << "Title" << title;
-    if (debug) qDebug() << "[Reportabug]" << "[prepareRequest]" << ":" << "Title" << body;
-
-    QStringList requestList;
-    requestList.append(QString("\"title\":\"") + title + QString("\""));
-    QString fixBody = body;
-    fixBody.replace(QString("\n"), QString("<br>"));
-    requestList.append(QString("\"body\":\"") + fixBody + QString("\""));
-    if (!QString(TAG_ASSIGNEE).isEmpty())
-        requestList.append(QString("\"assignee\":\"") + parseString(QString(TAG_ASSIGNEE)) + QString("\""));
-    if (!QString(TAG_MILESTONE).isEmpty())
-        requestList.append(QString("\"milestone\":") + QString(TAG_MILESTONE));
-    if (!QString(TAG_LABELS).isEmpty()) {
-        QStringList labels = QString(TAG_LABELS).split(QChar(','));
-        for (int i=0; i<labels.count(); i++)
-            labels[i] = QString("\"") + labels[i] + QString("\"");
-        requestList.append(QString("\"labels\":[") + labels.join(QChar(',')) + QString("]"));
-    }
-
-    QString request;
-    request += QString("{");
-    request += requestList.join(QChar(','));
-    request += QString("}");
-
-    return request.toLatin1();
-}
-
-
 void Reportabug::sendReport()
 {
     if (debug) qDebug() << "[Reportabug]" << "[sendReport]";
 
     int number = getNumberByIndex(ui->comboBox->currentIndex());
+    QMap<QString, QString> info;
+    info[QString("username")] = ui->lineEdit_username->text();
+    info[QString("password")] = ui->lineEdit_password->text();
+    info[QString("title")] = ui->lineEdit_title->text();
+    info[QString("body")] = ui->textEdit->toPlainText();
 
     if (number == -1)
         return;
 #ifdef ENABLE_GITHUB
     else if (number == 0)
-        sendReportUsingGithub();
+        github->sendReportUsingGithub(info);
 #endif /* ENABLE_GITHUB */
 #ifdef ENABLE_GITREPORT
     else if (number == 1)
-        sendReportUsingGitreport();
+        gitreport->sendReportUsingGitreport(info);
 #endif /* ENABLE_GITREPORT */
 }
 
 
 void Reportabug::showWindow()
 {
-    updateTabs(ui->comboBox->currentIndex());
+    externalUpdateTab();
     show();
 }
 
@@ -212,10 +194,14 @@ void Reportabug::updateTabs(const int index)
     if (debug) qDebug() << "[Reportabug]" << "[updateTabs]" << ":" << "Index" << index;
 
     int number = getNumberByIndex(index);
+    ui->lineEdit_username->clear();
+    ui->lineEdit_password->clear();
+    ui->lineEdit_title->setText(QString(TAG_TITLE));
+    ui->textEdit->setPlainText(QString(TAG_BODY));
 
     // it is out of conditional because I don't want a lot of ifdef/endif
 #ifdef ENABLE_GITREPORT
-    webView->setHidden(true);
+    gitreport->webView->setHidden(true);
 #endif /* ENABLE_GITREPORT */
     if (number == -1) {
         ui->widget_auth->setHidden(true);
@@ -231,26 +217,22 @@ void Reportabug::updateTabs(const int index)
         ui->label_password->setToolTip(QApplication::translate("Reportabug", "GitHub account password"));
         ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "password"));
         ui->lineEdit_password->setEchoMode(QLineEdit::Password);
-
-        ui->lineEdit_username->clear();
-        ui->lineEdit_password->clear();
-        ui->lineEdit_title->setText(QString(TAG_TITLE));
-        ui->textEdit->setPlainText(QString(TAG_BODY));
     }
 #endif /* ENABLE_GITHUB */
 #ifdef ENABLE_GITREPORT
     else if (number == 1) {
-        ui->widget_auth->setHidden(true);
+        ui->widget_auth->setHidden(false);
         ui->widget_title->setHidden(true);
-        ui->textEdit->setHidden(true);
+        ui->textEdit->setHidden(false);
+        ui->label_password->setText(QApplication::translate("Reportabug", "Email"));
+        ui->label_password->setToolTip(QApplication::translate("Reportabug", "Your email"));
+        ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "email"));
+        ui->lineEdit_password->setEchoMode(QLineEdit::Normal);
 
-        ui->lineEdit_username->clear();
-        ui->lineEdit_password->clear();
-        ui->textEdit->setPlainText(QString(TAG_BODY));
-        webView->load(QUrl(parseString(QString(PUBLIC_URL))));
-        disconnect(webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
-        disconnect(webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportFinished(bool)));
-        connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(gitreportLoaded(bool)));
+        gitreport->webView->load(QUrl(parseString(QString(PUBLIC_URL))));
+        disconnect(gitreport->webView, SIGNAL(loadFinished(bool)), gitreport, SLOT(gitreportLoaded(bool)));
+        disconnect(gitreport->webView, SIGNAL(loadFinished(bool)), gitreport, SLOT(gitreportFinished(bool)));
+        connect(gitreport->webView, SIGNAL(loadFinished(bool)), gitreport, SLOT(gitreportLoaded(bool)));
     }
 #endif /* ENABLE_GITREPORT */
 }

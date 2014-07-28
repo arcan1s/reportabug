@@ -15,10 +15,12 @@
  * License along with this library.                                        *
  ***************************************************************************/
 
+#include "githubmodule.h"
 #include "reportabug.h"
-#include "ui_reportabug.h"
 
+#include <QApplication>
 #include <QDebug>
+#include <QGridLayout>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QNetworkAccessManager>
@@ -29,20 +31,79 @@
 #include "config.h"
 
 
-void Reportabug::sendReportUsingGithub()
+GithubModule::GithubModule(QWidget *parent, bool debugCmd)
+    : QObject(parent),
+      debug(debugCmd),
+      mainWindow((Reportabug *)parent)
 {
-    if (debug) qDebug() << "[Reportabug]" << "[sendReportUsingGithub]";
+}
+
+
+GithubModule::~GithubModule()
+{
+    if (debug) qDebug() << "[GithubModule]" << "[~GithubModule]";
+}
+
+
+QByteArray GithubModule::prepareRequest(const QString title, const QString body)
+{
+    if (debug) qDebug() << "[GithubModule]" << "[prepareRequest]";
+    if (debug) qDebug() << "[GithubModule]" << "[prepareRequest]" << ":" << "Title" << title;
+    if (debug) qDebug() << "[GithubModule]" << "[prepareRequest]" << ":" << "Title" << body;
+
+    QStringList requestList;
+    requestList.append(QString("\"title\":\"") + title + QString("\""));
+    QString fixBody = body;
+    fixBody.replace(QString("\n"), QString("<br>"));
+    requestList.append(QString("\"body\":\"") + fixBody + QString("\""));
+    if (!QString(TAG_ASSIGNEE).isEmpty())
+        requestList.append(QString("\"assignee\":\"") + parseString(QString(TAG_ASSIGNEE)) + QString("\""));
+    if (!QString(TAG_MILESTONE).isEmpty())
+        requestList.append(QString("\"milestone\":") + QString(TAG_MILESTONE));
+    if (!QString(TAG_LABELS).isEmpty()) {
+        QStringList labels = QString(TAG_LABELS).split(QChar(','));
+        for (int i=0; i<labels.count(); i++)
+            labels[i] = QString("\"") + labels[i] + QString("\"");
+        requestList.append(QString("\"labels\":[") + labels.join(QChar(',')) + QString("]"));
+    }
+
+    QString request;
+    request += QString("{");
+    request += requestList.join(QChar(','));
+    request += QString("}");
+
+    return request.toLocal8Bit();
+}
+
+
+QString GithubModule::parseString(QString line)
+{
+    if (debug) qDebug() << "[GithubModule]" << "[parseString]";
+    if (debug) qDebug() << "[GithubModule]" << "[parseString]" << ":" << "Parse line" << line;
+
+    if (line.contains(QString("$OWNER")))
+        line = line.split(QString("$OWNER"))[0] +
+                QString(OWNER) +
+                line.split(QString("$OWNER"))[1];
+    if (line.contains(QString("$PROJECT")))
+        line = line.split(QString("$PROJECT"))[0] +
+                QString(PROJECT) +
+                line.split(QString("$PROJECT"))[1];
+
+    return line;
+}
+
+
+void GithubModule::sendReportUsingGithub(const QMap<QString, QString> info)
+{
+    if (debug) qDebug() << "[GithubModule]" << "[sendReportUsingGithub]";
 
     // authentication
-    QString username = ui->lineEdit_username->text();
-    QString password = ui->lineEdit_password->text();
-    QString concatenated = username + QString(":") + password;
+    QString concatenated = info[QString("username")] + QString(":") + info[QString("password")];
     QByteArray userData = concatenated.toLocal8Bit().toBase64();
     QString headerData = QString("Basic ") + userData;
     // text
-    QString title = ui->lineEdit_title->text();
-    QString body = ui->textEdit->toPlainText();
-    QByteArray text = prepareRequest(title, body);
+    QByteArray text = prepareRequest(info[QString("title")], info[QString("body")]);
     QByteArray textSize = QByteArray::number(text.size());
     // sending request
     QNetworkRequest request = QNetworkRequest(parseString(QString(ISSUES_URL)));
@@ -59,15 +120,15 @@ void Reportabug::sendReportUsingGithub()
 }
 
 
-void Reportabug::githubFinished(QNetworkReply *reply)
+void GithubModule::githubFinished(QNetworkReply *reply)
 {
-    if (debug) qDebug() << "[Reportabug]" << "[githubFinished]";
-    if (debug) qDebug() << "[Reportabug]" << "[githubFinished]" << ":" << "Error state" << reply->error();
-    if (debug) qDebug() << "[Reportabug]" << "[githubFinished]" << ":" << "Reply size" << reply->readBufferSize();
+    if (debug) qDebug() << "[GithubModule]" << "[githubFinished]";
+    if (debug) qDebug() << "[GithubModule]" << "[githubFinished]" << ":" << "Error state" << reply->error();
+    if (debug) qDebug() << "[GithubModule]" << "[githubFinished]" << ":" << "Reply size" << reply->readBufferSize();
 
     int state = true;
     QString answer = reply->readAll();
-    if (debug) qDebug() << "[Reportabug]" << "[replyFinished]" << ":" << answer;
+    if (debug) qDebug() << "[GithubModule]" << "[replyFinished]" << ":" << answer;
     QString messageBody, messageTitle;
     QMessageBox::Icon icon = QMessageBox::NoIcon;
     if (answer.contains(QString("\"html_url\":"))) {
@@ -109,10 +170,10 @@ void Reportabug::githubFinished(QNetworkReply *reply)
 
     switch (ret) {
     case QMessageBox::Ok:
-        if (state) close();
+        if (state) mainWindow->close();
         break;
     case QMessageBox::Retry:
-        if (state) updateTabs(ui->comboBox->currentIndex());
+        if (state) mainWindow->externalUpdateTab();
         break;
     default:
         break;

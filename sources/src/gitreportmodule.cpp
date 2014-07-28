@@ -15,20 +15,41 @@
  * License along with this library.                                        *
  ***************************************************************************/
 
+#include "gitreportmodule.h"
 #include "reportabug.h"
-#include "ui_reportabug.h"
 
+#include <QApplication>
+#include <QDebug>
+#include <QGridLayout>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QUrl>
 #include <QWebElement>
 #include <QWebFrame>
-#include <QWebView>
 
 #include "config.h"
 
 
-void Reportabug::sendReportUsingGitreport()
+GitreportModule::GitreportModule(QWidget *parent, bool debugCmd)
+    : QObject(parent),
+      debug(debugCmd),
+      mainWindow((Reportabug *)parent)
 {
-    if (debug) qDebug() << "[Reportabug]" << "[sendReportUsingGitreport]";
+    webView = new QWebView();
+}
+
+
+GitreportModule::~GitreportModule()
+{
+    if (debug) qDebug() << "[GitreportModule]" << "[~GitreportModule]";
+
+    delete webView;
+}
+
+
+void GitreportModule::sendReportUsingGitreport(const QMap<QString, QString> info)
+{
+    if (debug) qDebug() << "[GitreportModule]" << "[sendReportUsingGitreport]";
 
     QWebElement document = webView->page()->mainFrame()->documentElement();
     QWebElement captcha = document.findFirst(QString("input#captcha"));
@@ -39,9 +60,9 @@ void Reportabug::sendReportUsingGitreport()
     QWebElement usernameInput = document.findFirst(QString("input#name"));
 
     // input
-    usernameInput.setAttribute(QString("value"), ui->lineEdit_username->text());
-    emailInput.setAttribute(QString("value"), ui->lineEdit_password->text());
-    textArea.setPlainText(ui->textEdit->toPlainText());
+    usernameInput.setAttribute(QString("value"), info[QString("username")]);
+    emailInput.setAttribute(QString("value"), info[QString("password")]);
+    textArea.setPlainText(info[QString("body")]);
     // captcha
     captchaImg.setAttribute(QString("src"), QString("/simple_captcha?code=%1&amp;time=%2")
                             .arg(QString(CAPTCHA_KEY))
@@ -57,21 +78,13 @@ void Reportabug::sendReportUsingGitreport()
 }
 
 
-void Reportabug::gitreportLoaded(const bool state)
+void GitreportModule::gitreportLoaded(const bool state)
 {
-    if (debug) qDebug() << "[Reportabug]" << "[gitreportLoaded]";
-    if (debug) qDebug() << "[Reportabug]" << "[gitreportLoaded]" << ":" << "State" << state;
+    if (debug) qDebug() << "[GitreportModule]" << "[gitreportLoaded]";
+    if (debug) qDebug() << "[GitreportModule]" << "[gitreportLoaded]" << ":" << "State" << state;
 
-    if (state) {
-        ui->widget_auth->setHidden(false);
-        ui->widget_title->setHidden(true);
-        ui->textEdit->setHidden(false);
+    if (state)
         webView->setHidden(!debug);
-        ui->label_password->setText(QApplication::translate("Reportabug", "Email"));
-        ui->label_password->setToolTip(QApplication::translate("Reportabug", "Your email"));
-        ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "email"));
-        ui->lineEdit_password->setEchoMode(QLineEdit::Normal);
-    }
     else {
         QMessageBox messageBox;
         messageBox.setText(QApplication::translate("Reportabug", "Error!"));
@@ -87,10 +100,10 @@ void Reportabug::gitreportLoaded(const bool state)
 }
 
 
-void Reportabug::gitreportFinished(const bool state)
+void GitreportModule::gitreportFinished(const bool state)
 {
-    if (debug) qDebug() << "[Reportabug]" << "[gitreportFinished]";
-    if (debug) qDebug() << "[Reportabug]" << "[gitreportFinished]" << ":" << "State" << state;
+    if (debug) qDebug() << "[GitreportModule]" << "[gitreportFinished]";
+    if (debug) qDebug() << "[GitreportModule]" << "[gitreportFinished]" << ":" << "State" << state;
 
     QString messageBody, messageTitle;
     QMessageBox::Icon icon = QMessageBox::NoIcon;
@@ -118,10 +131,10 @@ void Reportabug::gitreportFinished(const bool state)
 
     switch (ret) {
     case QMessageBox::Ok:
-        if (state) close();
+        if (state) mainWindow->close();
         break;
     case QMessageBox::Retry:
-        if (state) updateTabs(ui->comboBox->currentIndex());
+        if (state) mainWindow->externalUpdateTab();
         break;
     default:
         break;
