@@ -23,11 +23,21 @@ message (STATUS "Version: ${SUBPROJECT_VERSION}")
 message (STATUS "Build date: ${CURRENT_DATE}")
 
 # install options
-option (USE_QT5 "Use Qt5 instead of Qt4" ON)
 option (BUILD_AS_LIBRARY "Build the application as a shared library" ON)
 option (BUILD_DOCS "Build developers documentation" OFF)
 option (ENABLE_GITHUB "Enable GitHub module" ON)
 option (ENABLE_GITREPORT "Enable GitReport module" ON)
+option (USE_QT5 "Use Qt5 instead of Qt4" ON)
+set (OWN_GITHUB_TOKEN "" CACHE STRING "Use own GitHub token instead of GitReport")
+# set flags
+if (OWN_GITHUB_TOKEN STREQUAL "")
+    set (USE_OWN_TOKEN OFF)
+else ()
+    set (USE_OWN_TOKEN ON)
+endif ()
+if (USE_OWN_TOKEN)
+    set (ENABLE_GITREPORT OFF)
+endif ()
 
 # flags
 if (CMAKE_COMPILER_IS_GNUCXX)

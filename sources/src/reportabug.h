@@ -84,7 +84,7 @@ private:
     /**
      * @brief contains information about enabled modules
      */
-    bool modules[2];
+    bool modules[3];
     /**
      * @brief class user interface
      */

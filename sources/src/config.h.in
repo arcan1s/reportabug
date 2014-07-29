@@ -20,7 +20,7 @@
 
 
 /*
- * main configuration
+ * Main configuration
  */
 // the owner of the source repository
 #define OWNER "arcan1s"
@@ -35,13 +35,13 @@
 #define TAG_MILESTONE ""
 // comma separated
 #define TAG_LABELS "auto,bug"
-// modules. Please use -DENABLE_GITHUB and -DENABLE_GITREPORT cmake flags
+// modules. Please use -DENABLE_GITHUB= and -DENABLE_GITREPORT= cmake flags
 // DO NOT EDIT THEM!
 #cmakedefine ENABLE_GITHUB
 #cmakedefine ENABLE_GITREPORT
 
 /*
- * configuration of creating an issue using GitHub API
+ * Configuration of creating an issue using GitHub API
  */
 // combobox text
 #define GITHUB_COMBOBOX "I want to report a bug using my GitHub account"
@@ -50,10 +50,25 @@
 #define ISSUES_URL "https://api.github.com/repos/$OWNER/$PROJECT/issues"
 
 /*
- * configuration of creating an issue using GitReports
+ * Configuration of creating an issue using GitHub API and own token
  *
- * please, visit https://gitreports.com/
- * and set up it for your repository
+ * This module will be used instead of GitReport module.
+ * To create a token please visit https://github.com/settings/applications
+ * and generate new one. Needed scopes are public_repo
+ * (or repo if you will use it for a private repository).
+ * Please keep in mind that passing the token in the clear,
+ * you may discredit your account.
+ */
+// please use -DOWN_GITHUB_TOKEN= cmake flag to define it
+// if it is empty, it will be ignored
+// DO NOT EDIT IT!
+#cmakedefine OWN_GITHUB_TOKEN "@OWN_GITHUB_TOKEN@"
+
+/*
+ * Configuration of creating an issue using GitReports
+ *
+ * Please, visit https://gitreports.com/
+ * and set up it for your repository.
  */
 // combobox text
 #define GITREPORT_COMBOBOX "GitHub? I don't understand what do you want from me!"

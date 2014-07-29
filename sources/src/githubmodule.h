@@ -38,7 +38,14 @@ class QNetworkReply;
  * [the API page](https://developer.github.com/v3/issues/) for more details.
  * This module requires an users authentication. The typical POST request is:
  * @code
- * curl -X POST -u user:pass -d '{"title":"A new bug","body":"Some error occurs"}' https://api.github.com/repos/owner/repo/issues
+ * curl -X POST -u user:pass -d '{"title":"A new bug","body":"Some error occurs"}' \
+ *      https://api.github.com/repos/owner/repo/issues
+ * @endcode
+ *
+ * The module also may send request using given token. In this case request is:
+ * @code
+ * curl -X POST -H "Authorization: token token" -d '{"title":"A new bug","body":"Some error occurs"}' \
+ *      https://api.github.com/repos/owner/repo/issues
  * @endcode
  *
  * This module depends on QtNetwork module.
@@ -67,6 +74,7 @@ public slots:
      *                       body (body of an issue),
      *                       password (GitHub password),
      *                       title (title of an issue),
+     *                       userdata (given GitHub token, it is optional key),
      *                       username (GitHub user name),
      */
     void sendReportUsingGithub(const QMap<QString, QString> info);

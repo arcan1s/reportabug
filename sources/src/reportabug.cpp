@@ -29,9 +29,9 @@
 #include <QPushButton>
 
 #include "config.h"
-#ifdef ENABLE_GITHUB
+#if defined(ENABLE_GITHUB) || defined(OWN_GITHUB_TOKEN)
 #include "githubmodule.h"
-#endif /* ENABLE_GITHUB */
+#endif /* defined(ENABLE_GITHUB) || defined(OWN_GITHUB_TOKEN) */
 #ifdef ENABLE_GITREPORT
 #include "gitreportmodule.h"
 #endif /* ENABLE_GITREPORT */
@@ -63,9 +63,9 @@ Reportabug::~Reportabug()
 {
     if (debug) qDebug() << "[Reportabug]" << "[~Reportabug]";
 
-#ifdef ENABLE_GITHUB
+#if defined(ENABLE_GITHUB) || defined(OWN_GITHUB_TOKEN)
     delete github;
-#endif /* ENABLE_GITHUB */
+#endif /* defined(ENABLE_GITHUB) || defined(OWN_GITHUB_TOKEN) */
 #ifdef ENABLE_GITREPORT
     delete gitreport;
 #endif /* ENABLE_GITREPORT */
@@ -106,9 +106,9 @@ void Reportabug::createComboBox()
 
     ui->comboBox->clear();
     if (modules[0])
-        ui->comboBox->addItem(QString(GITHUB_COMBOBOX));
-    if (modules[1])
-        ui->comboBox->addItem(QString(GITREPORT_COMBOBOX));
+        ui->comboBox->addItem(QApplication::translate("Reportabug", GITHUB_COMBOBOX));
+    if (modules[1] || modules[2])
+        ui->comboBox->addItem(QApplication::translate("Reportabug", GITREPORT_COMBOBOX));
 }
 
 
@@ -120,21 +120,29 @@ int Reportabug::getNumberByIndex(const int index)
     if (debug) qDebug() << "[Reportabug]" << "[getNumberByIndex]";
     if (debug) qDebug() << "[Reportabug]" << "[getNumberByIndex]" << ":" << "Index" << index;
 
-    if (index == -1)
-        // nothing to do
+    if ((modules[0]) && (modules[1])) {
+        if (index == 0)
+            return 0;
+        else if (index == 1)
+            return 1;
+    }
+    else if ((modules[0]) && (modules[2])) {
+        if (index == 0)
+            return 0;
+        else if (index == 1)
+            return 2;
+    }
+    else if ((modules[1]) && (modules[2]))
+        // wtf??
         return -1;
-    else if ((modules[0]) && (modules[1]))
-        // both are enabled
-        return index;
     else if (modules[0])
-        // only github is enabled
         return 0;
     else if (modules[1])
-        // only gitreport is enabled
         return 1;
-    else
-        // nothing to do
-        return -1;
+    else if (modules[2])
+        return 2;
+
+    return -1;
 }
 
 
@@ -147,10 +155,13 @@ void Reportabug::initModules()
 
     modules[0] = false;
     modules[1] = false;
+    modules[2] = false;
 
+#if defined(ENABLE_GITHUB) || defined(OWN_GITHUB_TOKEN)
+    github = new GithubModule(this, debug);
+#endif /* defined(ENABLE_GITHUB) || defined(OWN_GITHUB_TOKEN) */
 #ifdef ENABLE_GITHUB
     modules[0] = true;
-    github = new GithubModule(this, debug);
 #endif /* ENABLE_GITHUB */
 #ifdef ENABLE_GITREPORT
     modules[1] = true;
@@ -158,6 +169,9 @@ void Reportabug::initModules()
     // 4 is a magic number. Seriously
     ui->verticalLayout->insertWidget(4, gitreport->webView);
 #endif /* ENABLE_GITREPORT */
+#ifdef OWN_GITHUB_TOKEN
+    modules[2] = true;
+#endif /* OWN_GITHUB_TOKEN */
 }
 
 
@@ -203,10 +217,10 @@ void Reportabug::sendReport()
 
     int number = getNumberByIndex(ui->comboBox->currentIndex());
     QMap<QString, QString> info;
-    info[QString("username")] = ui->lineEdit_username->text();
+    info[QString("body")] = ui->textEdit->toPlainText();
     info[QString("password")] = ui->lineEdit_password->text();
     info[QString("title")] = ui->lineEdit_title->text();
-    info[QString("body")] = ui->textEdit->toPlainText();
+    info[QString("username")] = ui->lineEdit_username->text();
 
     if (number == -1)
         return;
@@ -218,6 +232,12 @@ void Reportabug::sendReport()
     else if (number == 1)
         gitreport->sendReportUsingGitreport(info);
 #endif /* ENABLE_GITREPORT */
+#ifdef OWN_GITHUB_TOKEN
+    else if (number == 2) {
+        info[QString("userdata")] = QString(OWN_GITHUB_TOKEN);
+        github->sendReportUsingGithub(info);
+    }
+#endif /* OWN_GITHUB_TOKEN */
 }
 
 
@@ -281,4 +301,11 @@ void Reportabug::updateTabs(const int index)
         connect(gitreport->webView, SIGNAL(loadFinished(bool)), gitreport, SLOT(gitreportLoaded(bool)));
     }
 #endif /* ENABLE_GITREPORT */
+#ifdef OWN_GITHUB_TOKEN
+    else if (number == 2) {
+        ui->widget_auth->setHidden(true);
+        ui->widget_title->setHidden(false);
+        ui->textEdit->setHidden(false);
+    }
+#endif /* OWN_GITHUB_TOKEN */
 }

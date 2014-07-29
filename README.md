@@ -4,7 +4,7 @@ reportabug
 Information
 -----------
 
-A simple Qt application/library which allows users to create an issue for GitHub projects. It may work over [GitHub](https://github.com) or [GitReport](https://gitreports.com/). For the developer configuration please use `config.h.in` header.
+Qt application/library which allows users to create an issue for GitHub projects. It may work over [GitHub](https://github.com) or [GitReport](https://gitreports.com/). For the developer configuration please use `config.h.in` header.
 
 Configuration
 -------------
@@ -20,7 +20,7 @@ Available variables:
 * `TAG_BODY` - default body of an issue. It may be used for both modules.
 * `TAG_TITLE` - default title of an issue. It may be used only for GitHub module.
 * `TAG_ASSIGNEE` - assign an issue to this account. It may be used only for GitHub module. This tag will work only if user has push access. If it will be empty, it will be ignored.
-* `TAG_LABELS` - set this labels to an issue. Labels should be comma separated. It may be used only for GitHub module. This tag will work only if user has push access. If it will be empty, it will be ignored.
+* `TAG_LABELS` - set these labels to an issue. Labels should be comma separated. It may be used only for GitHub module. This tag will work only if user has push access. If it will be empty, it will be ignored.
 * `TAG_MILESTONE` - set this milestone to an issue. It may be used only for GitHub module. This tag will work only if user has push access. If it will be empty, it will be ignored.
 
 ### Send issue over GitHub ###
@@ -35,6 +35,14 @@ Available variables:
 * `ISSUES_URL` - issues url, in the most cases do not touch it. Default is `https://api.github.com/repos/$OWNER/$PROJECT/issues`. Available tags here are `$PROJECT`, `$OWNER`.
 
 This module requires `QtNetwork` module. To disable this module use `-DENABLE_GITHUB=0` cmake flag.
+
+### Send issue over GitHub using own token ###
+
+This module requires your access token. Please visit [this page](https://github.com/settings/applications) and generate a new one. Needed scopes are `public_repo` (or `repo` if you will use it for a private repository). Please keep in mind that passing the token in the clear, you may discredit your account. The typical POST request is
+
+    curl -X POST -H "Authorization: token token" -d '{"title":"A new bug","body":"Some error occurs"}' https://api.github.com/repos/owner/repo/issues
+
+This module requires `QtNetwork` module. To enable this module set up your token using `-DOWN_GITHUB_TOKEN=0` cmake flag.
 
 ### Send issue over GitReport ###
 
@@ -105,6 +113,7 @@ Installation
 * `-DBUILD_DOCS:BOOL=1` - build developer documentation
 * `-DENABLE_GITHUB=0` - disable GitHub module
 * `-DENABLE_GITREPORT=0` - disable GitReport module
+* `-DOWN_GITHUB_TOKEN=STRING` - use STRING as own GitHub token
 * `-DUSE_QT5:BOOL=0` - use Qt4 instead of Qt5 for GUI
 
 Additional information

@@ -124,9 +124,14 @@ void GithubModule::sendReportUsingGithub(const QMap<QString, QString> info)
     if (debug) qDebug() << "[GithubModule]" << "[sendReportUsingGithub]";
 
     // authentication
-    QString concatenated = info[QString("username")] + QString(":") + info[QString("password")];
-    QByteArray userData = concatenated.toLocal8Bit().toBase64();
-    QString headerData = QString("Basic ") + userData;
+    QString headerData;
+    if (info.contains(QString("userdata")))
+        headerData = QString("token ") + info[QString("userdata")];
+    else {
+        QString concatenated = info[QString("username")] + QString(":") + info[QString("password")];
+        QByteArray userData = concatenated.toLocal8Bit().toBase64();
+        headerData = QString("Basic ") + userData;
+    }
     // text
     QByteArray text = prepareRequest(info[QString("title")], info[QString("body")]);
     QByteArray textSize = QByteArray::number(text.size());
