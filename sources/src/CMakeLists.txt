@@ -12,6 +12,7 @@ if (ENABLE_GITREPORT)
 endif ()
 
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/inconfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/inconfig.h)
 
 # include_path
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../

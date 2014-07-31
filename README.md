@@ -42,7 +42,7 @@ This module requires your access token. Please visit [this page](https://github.
 
     curl -X POST -H "Authorization: token token" -d '{"title":"A new bug","body":"Some error occurs"}' https://api.github.com/repos/owner/repo/issues
 
-This module requires `QtNetwork` module. To enable this module set up your token using `-DOWN_GITHUB_TOKEN=0` cmake flag.
+This module requires `QtNetwork` module. To enable this module set up your token using `-DOWN_GITHUB_TOKEN=` cmake flag.
 
 ### Send issue over GitReport ###
 

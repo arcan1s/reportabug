@@ -28,7 +28,6 @@
 #include <QKeyEvent>
 #include <QMainWindow>
 
-#include "config.h"
 
 class GithubModule;
 class GitreportModule;

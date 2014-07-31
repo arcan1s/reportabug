@@ -18,6 +18,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <inconfig.h>
+
 
 /*
  * Main configuration
@@ -35,10 +37,6 @@
 #define TAG_MILESTONE ""
 // comma separated
 #define TAG_LABELS "auto,bug"
-// modules. Please use -DENABLE_GITHUB= and -DENABLE_GITREPORT= cmake flags
-// DO NOT EDIT THEM!
-#cmakedefine ENABLE_GITHUB
-#cmakedefine ENABLE_GITREPORT
 
 /*
  * Configuration of creating an issue using GitHub API
@@ -59,10 +57,6 @@
  * Please keep in mind that passing the token in the clear,
  * you may discredit your account.
  */
-// please use -DOWN_GITHUB_TOKEN= cmake flag to define it
-// if it is empty, it will be ignored
-// DO NOT EDIT IT!
-#cmakedefine OWN_GITHUB_TOKEN "@OWN_GITHUB_TOKEN@"
 
 /*
  * Configuration of creating an issue using GitReports
