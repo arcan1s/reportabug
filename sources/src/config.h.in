@@ -69,10 +69,8 @@
 // public link; in the most cases do not touch it
 // available tags are $PROJECT, $OWNER
 #define PUBLIC_URL "https://gitreports.com/issue/$OWNER/$PROJECT"
-// captcha
-#define CAPTCHA_KEY "7f6ef90bce7389088a52c5c9101aad206b21b56d"
-#define CAPTCHA_TEXT "QJNZXY"
-#define CAPTCHA_TIME "1406531273"
+// captcha url; in the most cases do not touch it
+#define CAPTCHA_URL "https://gitreports.com/simple_captcha?code="
 
 
 #endif /* CONFIG_H */

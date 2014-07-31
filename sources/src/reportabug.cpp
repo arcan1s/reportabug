@@ -85,6 +85,17 @@ void Reportabug::externalUpdateTab()
 
 
 /**
+ * @fn setCaptchaImage
+ */
+void Reportabug::setCaptchaImage(QPixmap captcha)
+{
+    if (debug) qDebug() << "[Reportabug]" << "[setCaptchaImage]";
+
+    ui->label_captcha->setPixmap(captcha);
+}
+
+
+/**
  * @fn createActions
  */
 void Reportabug::createActions()
@@ -167,7 +178,7 @@ void Reportabug::initModules()
     modules[1] = true;
     gitreport = new GitreportModule(this, debug);
     // 4 is a magic number. Seriously
-    ui->verticalLayout->insertWidget(4, gitreport->webView);
+    ui->verticalLayout->insertWidget(5, gitreport->webView);
 #endif /* ENABLE_GITREPORT */
 #ifdef OWN_GITHUB_TOKEN
     modules[2] = true;
@@ -218,6 +229,7 @@ void Reportabug::sendReport()
     int number = getNumberByIndex(ui->comboBox->currentIndex());
     QMap<QString, QString> info;
     info[QString("body")] = ui->textEdit->toPlainText();
+    info[QString("captcha")] = ui->lineEdit_captcha->text();
     info[QString("password")] = ui->lineEdit_password->text();
     info[QString("title")] = ui->lineEdit_title->text();
     info[QString("username")] = ui->lineEdit_username->text();
@@ -264,6 +276,7 @@ void Reportabug::updateTabs(const int index)
     ui->lineEdit_password->clear();
     ui->lineEdit_title->setText(QString(TAG_TITLE));
     ui->textEdit->setPlainText(QString(TAG_BODY));
+    ui->lineEdit_captcha->clear();
 
     // it is out of conditional because I don't want a lot of ifdef/endif
 #ifdef ENABLE_GITREPORT
@@ -273,12 +286,14 @@ void Reportabug::updateTabs(const int index)
         ui->widget_auth->setHidden(true);
         ui->widget_title->setHidden(true);
         ui->textEdit->setHidden(true);
+        ui->widget_captcha->setHidden(true);
     }
 #ifdef ENABLE_GITHUB
     else if (number == 0) {
         ui->widget_auth->setHidden(false);
         ui->widget_title->setHidden(false);
         ui->textEdit->setHidden(false);
+        ui->widget_captcha->setHidden(true);
         ui->label_password->setText(QApplication::translate("Reportabug", "Password"));
         ui->label_password->setToolTip(QApplication::translate("Reportabug", "GitHub account password"));
         ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "password"));
@@ -290,6 +305,7 @@ void Reportabug::updateTabs(const int index)
         ui->widget_auth->setHidden(false);
         ui->widget_title->setHidden(true);
         ui->textEdit->setHidden(false);
+        ui->widget_captcha->setHidden(false);
         ui->label_password->setText(QApplication::translate("Reportabug", "Email"));
         ui->label_password->setToolTip(QApplication::translate("Reportabug", "Your email"));
         ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "email"));

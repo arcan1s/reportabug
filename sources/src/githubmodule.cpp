@@ -159,7 +159,7 @@ void GithubModule::githubFinished(QNetworkReply *reply)
     if (debug) qDebug() << "[GithubModule]" << "[githubFinished]" << ":" << "Error state" << reply->error();
     if (debug) qDebug() << "[GithubModule]" << "[githubFinished]" << ":" << "Reply size" << reply->readBufferSize();
 
-    int state = true;
+    bool state = true;
     QString answer = reply->readAll();
     if (debug) qDebug() << "[GithubModule]" << "[replyFinished]" << ":" << answer;
     QString messageBody, messageTitle;
@@ -189,6 +189,7 @@ void GithubModule::githubFinished(QNetworkReply *reply)
         icon = QMessageBox::Critical;
         state = false;
     }
+    reply->deleteLater();
 
     QMessageBox messageBox;
     messageBox.setText(messageTitle);

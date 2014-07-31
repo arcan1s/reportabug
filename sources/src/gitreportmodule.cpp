@@ -29,6 +29,9 @@
 #include <QDebug>
 #include <QGridLayout>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QPushButton>
 #include <QUrl>
 #include <QWebElement>
@@ -71,9 +74,7 @@ void GitreportModule::sendReportUsingGitreport(const QMap<QString, QString> info
     if (debug) qDebug() << "[GitreportModule]" << "[sendReportUsingGitreport]";
 
     QWebElement document = webView->page()->mainFrame()->documentElement();
-    QWebElement captcha = document.findFirst(QString("input#captcha"));
-    QWebElement captchaImg = document.findFirst(QString("img#[alt=captcha]"));
-    QWebElement captchaKey = document.findFirst(QString("input#captcha_key"));
+    QWebElement captchaKey = document.findFirst(QString("input#captcha"));
     QWebElement emailInput = document.findFirst(QString("input#email"));
     QWebElement textArea = document.findFirst(QString("textarea#details"));
     QWebElement usernameInput = document.findFirst(QString("input#name"));
@@ -82,12 +83,7 @@ void GitreportModule::sendReportUsingGitreport(const QMap<QString, QString> info
     usernameInput.setAttribute(QString("value"), info[QString("username")]);
     emailInput.setAttribute(QString("value"), info[QString("password")]);
     textArea.setPlainText(info[QString("body")]);
-    // captcha
-    captchaImg.setAttribute(QString("src"), QString("/simple_captcha?code=%1&amp;time=%2")
-                            .arg(QString(CAPTCHA_KEY))
-                            .arg(QString(CAPTCHA_TIME)));
-    captchaKey.setAttribute(QString("value"), QString(CAPTCHA_KEY));
-    captcha.setAttribute(QString("value"), QString(CAPTCHA_TEXT));
+    captchaKey.setAttribute(QString("value"), info[QString("captcha")]);
 
     // send request
     document.findFirst(QString("input[name=commit]")).evaluateJavaScript("this.click()");
@@ -105,8 +101,17 @@ void GitreportModule::gitreportLoaded(const bool state)
     if (debug) qDebug() << "[GitreportModule]" << "[gitreportLoaded]";
     if (debug) qDebug() << "[GitreportModule]" << "[gitreportLoaded]" << ":" << "State" << state;
 
-    if (state)
+    if (state) {
         webView->setHidden(!debug);
+        // captcha
+        QWebElement document = webView->page()->mainFrame()->documentElement();
+        QWebElement captchaImg = document.findFirst(QString("input#captcha_key"));
+        QString captchaUrl = QString(CAPTCHA_URL) + captchaImg.attribute(QString("value"));
+        QNetworkRequest request(captchaUrl);
+        manager.get(request);
+        disconnect(&manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(setCaptcha(QNetworkReply *)));
+        connect(&manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(setCaptcha(QNetworkReply *)));
+    }
     else {
         QMessageBox messageBox;
         messageBox.setText(QApplication::translate("Reportabug", "Error!"));
@@ -164,4 +169,21 @@ void GitreportModule::gitreportFinished(const bool state)
     default:
         break;
     }
+}
+
+
+/**
+ * @fn setCaptcha
+ */
+void GitreportModule::setCaptcha(QNetworkReply *reply)
+{
+    if (debug) qDebug() << "[setCaptcha]" << "[setCaptcha]";
+    if (debug) qDebug() << "[setCaptcha]" << "[setCaptcha]" << ":" << "Error state" << reply->error();
+    if (debug) qDebug() << "[setCaptcha]" << "[setCaptcha]" << ":" << "Reply size" << reply->readBufferSize();
+
+    QByteArray answer = reply->readAll();
+    QPixmap captcha;
+    captcha.loadFromData(answer);
+    mainWindow->setCaptchaImage(captcha);
+    reply->deleteLater();
 }

@@ -50,13 +50,11 @@ This module requires `QtNetwork` module. To enable this module set up your token
 
 Available variables:
 
-* `CAPTCHA_KEY` - captcha key. It may be found in the source of the `PUBLIC_URL` page. Default is `7f6ef90bce7389088a52c5c9101aad206b21b56d`.
-* `CAPTCHA_TEXT` - captcha text. It may be found in the source of the `PUBLIC_URL` page. Default is `QJNZXY`.
-* `CAPTCHA_TIME` - captcha time. It may be found in the source of the `PUBLIC_URL` page. Default is `1406531273`.
+* `CAPTCHA_URL` - captcha url, in the most cases do not touch it. Default is `https://gitreports.com/simple_captcha?code=`.
 * `GITREPORT_COMBOBOX` - text of this module into comboBox.
 * `PUBLIC_URL` - issues url, in the most cases do not touch it. Default is `https://gitreports.com/issue/$OWNER/$PROJECT`. Available tags here are `$PROJECT`, `$OWNER`.
 
-This module requires `QtWebKit` module. To disable this module use `-DENABLE_GITREPORT=0` cmake flag.
+This module requires `QtWebKit` and `QtNetwork` modules. To disable this module use `-DENABLE_GITREPORT=0` cmake flag.
 
 Instruction
 ===========
@@ -65,10 +63,10 @@ Dependencies
 ------------
 
 * qt5-base (if Qt5 is used) or qt4 (if Qt4 is used)
+* qt5-network (if Qt5 is used)
 
 ### Optional dependencies ###
 
-* qt5-network (if Qt5 is used) *(requires for GitHub module)*
 * qt5-webkit (if Qt5 is used) or qtwebkit (if Qt4 is used) *(requires for GitReport module)*
 * doxygen *(developers documentation)*
 

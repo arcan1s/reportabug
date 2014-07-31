@@ -29,6 +29,7 @@
 #include <QObject>
 #include <QWebView>
 
+class QNetworkAccessManager;
 class Reportabug;
 
 /**
@@ -37,7 +38,7 @@ class Reportabug;
  * creating an issue. Please visit [this page](https://gitreports.com/)
  * and set up it for your repository.
  *
- * This module depends on QtWebKit module.
+ * This module depends on QtWebKit and QtNetwork modules.
  */
 class GitreportModule : public QObject
 {
@@ -81,6 +82,11 @@ private slots:
      * @param bool           state of web page loading
      */
     void gitreportLoaded(const bool state);
+    /**
+     * @brief method which will be called after loading captcha image
+     * @param reply          reply of the request
+     */
+    void setCaptcha(QNetworkReply *reply);
 
 private:
     /**
@@ -90,7 +96,11 @@ private:
     /**
      * @brief Reportabug class
      */
-    Reportabug *mainWindow;;
+    Reportabug *mainWindow;
+    /**
+     * @brief manager for getting captcha
+     */
+    QNetworkAccessManager manager;
 };
 
 

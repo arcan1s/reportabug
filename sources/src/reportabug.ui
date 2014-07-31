@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>543</width>
-    <height>374</height>
+    <width>541</width>
+    <height>372</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -107,6 +107,22 @@
       <property name="acceptRichText">
        <bool>false</bool>
       </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="widget_captcha" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="label_captcha">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_captcha"/>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>

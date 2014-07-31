@@ -59,6 +59,11 @@ public:
      * @brief method which is used for update tabs from external classes
      */
     void externalUpdateTab();
+    /**
+     * @brief method which sets captcha image
+     * @param captcha        captcha image
+     */
+    void setCaptchaImage(QPixmap captcha);
 
 public slots:
     /**
