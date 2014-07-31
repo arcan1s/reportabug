@@ -68,12 +68,12 @@ Dependencies
 ### Optional dependencies ###
 
 * qt5-webkit (if Qt5 is used) or qtwebkit (if Qt4 is used) *(requires for GitReport module)*
-* doxygen *(developers documentation)*
 
 ### Make dependencies ###
 
 * automoc4
 * cmake
+* doxygen *(optional, developers documentation)*
 
 Installation
 ------------

@@ -120,7 +120,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_captcha"/>
+        <widget class="QLineEdit" name="lineEdit_captcha">
+         <property name="placeholderText">
+          <string>captcha</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

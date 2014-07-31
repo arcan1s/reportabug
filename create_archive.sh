@@ -3,7 +3,7 @@
 ARCHIVE="reportabug"
 SRCDIR="sources"
 FILES="AUTHORS CHANGELOG COPYING README.md"
-IGNORELIST="build *.cppcheck"
+IGNORELIST="build *.cppcheck *.qm"
 VERSION=$(grep -m1 PROJECT_VERSION_MAJOR sources/CMakeLists.txt | awk '{print $3}' | cut -c 1).\
 $(grep -m1 PROJECT_VERSION_MINOR sources/CMakeLists.txt | awk '{print $3}' | cut -c 1).\
 $(grep -m1 PROJECT_VERSION_PATCH sources/CMakeLists.txt | awk '{print $3}' | cut -c 1)

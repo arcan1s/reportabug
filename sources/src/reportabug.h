@@ -26,6 +26,7 @@
 #define REPORTABUG_H
 
 #include <QKeyEvent>
+#include <QLocale>
 #include <QMainWindow>
 
 

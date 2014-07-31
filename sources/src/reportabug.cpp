@@ -117,9 +117,9 @@ void Reportabug::createComboBox()
 
     ui->comboBox->clear();
     if (modules[0])
-        ui->comboBox->addItem(QApplication::translate("Reportabug", GITHUB_COMBOBOX));
+        ui->comboBox->addItem(GITHUB_COMBOBOX);
     if (modules[1] || modules[2])
-        ui->comboBox->addItem(QApplication::translate("Reportabug", GITREPORT_COMBOBOX));
+        ui->comboBox->addItem(GITREPORT_COMBOBOX);
 }
 
 
