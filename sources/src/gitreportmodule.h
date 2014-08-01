@@ -49,9 +49,11 @@ public:
      * @brief GitreportModule class constructor
      * @param parent         parent object
      * @param debugCmd       show debug messages
+     * @param params         dynamic parametrs. Needed keys are the same as in config.h
      */
     explicit GitreportModule(QWidget *parent = 0,
-                             bool debugCmd = false);
+                             bool debugCmd = false,
+                             QMap<QString, QString> params = QMap<QString, QString>());
     /**
      * @brief GitreportModule class destructor
      */
@@ -93,6 +95,10 @@ private:
      * @brief show debug messages
      */
     bool debug;
+    /**
+     * @brief dynamic parametrs
+     */
+    QMap<QString, QString> dynamic;
     /**
      * @brief Reportabug class
      */

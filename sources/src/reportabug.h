@@ -26,7 +26,6 @@
 #define REPORTABUG_H
 
 #include <QKeyEvent>
-#include <QLocale>
 #include <QMainWindow>
 
 
@@ -49,9 +48,11 @@ public:
      * @brief Reportabug class constructor
      * @param parent         parent object
      * @param debugCmd       show debug messages
+     * @param params         dynamic parametrs. Needed keys are the same as in config.h
      */
     explicit Reportabug(QWidget *parent = 0,
-                        bool debugCmd = false);
+                        bool debugCmd = false,
+                        QMap<QString, QString> params = QMap<QString, QString>());
     /**
      * @brief Reportabug class destructor
      */
@@ -86,6 +87,10 @@ private:
      * @brief show debug messages
      */
     bool debug;
+    /**
+     * @brief dynamic parametrs
+     */
+    QMap<QString, QString> dynamic;
     /**
      * @brief contains information about enabled modules
      */

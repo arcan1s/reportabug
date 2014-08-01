@@ -44,11 +44,41 @@
 /**
  * @fn Reportabug
  */
-Reportabug::Reportabug(QWidget *parent, bool debugCmd)
+Reportabug::Reportabug(QWidget *parent, bool debugCmd, QMap<QString, QString> params)
     : QMainWindow(parent),
       debug(debugCmd),
+      dynamic(params),
       ui(new Ui::Reportabug)
 {
+    // read settings
+    // main
+    if (!dynamic.contains(QString("OWNER")))
+        dynamic[QString("OWNER")] = QString(OWNER);
+    if (!dynamic.contains(QString("PROJECT")))
+        dynamic[QString("PROJECT")] = QString(PROJECT);
+    if (!dynamic.contains(QString("TAG_ASSIGNEE")))
+        dynamic[QString("TAG_ASSIGNEE")] = QString(TAG_ASSIGNEE);
+    if (!dynamic.contains(QString("TAG_BODY")))
+        dynamic[QString("TAG_BODY")] = QString(TAG_BODY);
+    if (!dynamic.contains(QString("TAG_LABELS")))
+        dynamic[QString("TAG_LABELS")] = QString(TAG_LABELS);
+    if (!dynamic.contains(QString("TAG_MILESTONE")))
+        dynamic[QString("TAG_MILESTONE")] = QString(TAG_MILESTONE);
+    if (!dynamic.contains(QString("TAG_TITLE")))
+        dynamic[QString("TAG_TITLE")] = QString(TAG_TITLE);
+    // github module
+    if (!dynamic.contains(QString("GITHUB_COMBOBOX")))
+        dynamic[QString("GITHUB_COMBOBOX")] = QString(GITHUB_COMBOBOX);
+    if (!dynamic.contains(QString("ISSUES_URL")))
+        dynamic[QString("ISSUES_URL")] = QString(ISSUES_URL);
+    // gitreport module
+    if (!dynamic.contains(QString("CAPTCHA_URL")))
+        dynamic[QString("CAPTCHA_URL")] = QString(CAPTCHA_URL);
+    if (!dynamic.contains(QString("GITREPORT_COMBOBOX")))
+        dynamic[QString("GITREPORT_COMBOBOX")] = QString(GITREPORT_COMBOBOX);
+    if (!dynamic.contains(QString("PUBLIC_URL")))
+        dynamic[QString("PUBLIC_URL")] = QString(PUBLIC_URL);
+
     ui->setupUi(this);
     initModules();
     createComboBox();
@@ -117,9 +147,9 @@ void Reportabug::createComboBox()
 
     ui->comboBox->clear();
     if (modules[0])
-        ui->comboBox->addItem(GITHUB_COMBOBOX);
+        ui->comboBox->addItem(dynamic[QString("GITHUB_COMBOBOX")]);
     if (modules[1] || modules[2])
-        ui->comboBox->addItem(GITREPORT_COMBOBOX);
+        ui->comboBox->addItem(dynamic[QString("GITREPORT_COMBOBOX")]);
 }
 
 
@@ -208,11 +238,11 @@ QString Reportabug::parseString(QString line)
 
     if (line.contains(QString("$OWNER")))
         line = line.split(QString("$OWNER"))[0] +
-                QString(OWNER) +
+                dynamic[QString("OWNER")] +
                 line.split(QString("$OWNER"))[1];
     if (line.contains(QString("$PROJECT")))
         line = line.split(QString("$PROJECT"))[0] +
-                QString(PROJECT) +
+                dynamic[QString("PROJECT")] +
                 line.split(QString("$PROJECT"))[1];
 
     return line;
@@ -274,8 +304,8 @@ void Reportabug::updateTabs(const int index)
     int number = getNumberByIndex(index);
     ui->lineEdit_username->clear();
     ui->lineEdit_password->clear();
-    ui->lineEdit_title->setText(QString(TAG_TITLE));
-    ui->textEdit->setPlainText(QString(TAG_BODY));
+    ui->lineEdit_title->setText(dynamic[QString("TAG_TITLE")]);
+    ui->textEdit->setPlainText(dynamic[QString("TAG_BODY")]);
     ui->lineEdit_captcha->clear();
 
     // it is out of conditional because I don't want a lot of ifdef/endif
@@ -311,7 +341,7 @@ void Reportabug::updateTabs(const int index)
         ui->lineEdit_password->setPlaceholderText(QApplication::translate("Reportabug", "email"));
         ui->lineEdit_password->setEchoMode(QLineEdit::Normal);
 
-        gitreport->webView->load(QUrl(parseString(QString(PUBLIC_URL))));
+        gitreport->webView->load(QUrl(parseString(dynamic[QString("PUBLIC_URL")])));
         disconnect(gitreport->webView, SIGNAL(loadFinished(bool)), gitreport, SLOT(gitreportLoaded(bool)));
         disconnect(gitreport->webView, SIGNAL(loadFinished(bool)), gitreport, SLOT(gitreportFinished(bool)));
         connect(gitreport->webView, SIGNAL(loadFinished(bool)), gitreport, SLOT(gitreportLoaded(bool)));

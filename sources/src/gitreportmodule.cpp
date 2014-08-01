@@ -37,8 +37,6 @@
 #include <QWebElement>
 #include <QWebFrame>
 
-#include "config.h"
-
 
 /**
  * @class GitreportModule
@@ -46,9 +44,10 @@
 /**
  * @fn GitreportModule
  */
-GitreportModule::GitreportModule(QWidget *parent, bool debugCmd)
+GitreportModule::GitreportModule(QWidget *parent, bool debugCmd, QMap<QString, QString> params)
     : QObject(parent),
       debug(debugCmd),
+      dynamic(params),
       mainWindow((Reportabug *)parent)
 {
     webView = new QWebView();
@@ -106,7 +105,7 @@ void GitreportModule::gitreportLoaded(const bool state)
         // captcha
         QWebElement document = webView->page()->mainFrame()->documentElement();
         QWebElement captchaImg = document.findFirst(QString("input#captcha_key"));
-        QString captchaUrl = QString(CAPTCHA_URL) + captchaImg.attribute(QString("value"));
+        QString captchaUrl = QString(dynamic[QString("CAPTCHA_URL")]) + captchaImg.attribute(QString("value"));
         QNetworkRequest request(captchaUrl);
         manager.get(request);
         disconnect(&manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(setCaptcha(QNetworkReply *)));

@@ -4,12 +4,12 @@ reportabug
 Information
 -----------
 
-Qt application/library which allows users to create an issue for GitHub projects. It may work over [GitHub](https://github.com) or [GitReport](https://gitreports.com/). For the developer configuration please use `config.h.in` header.
+Qt application/library which allows users to create an issue for GitHub projects. It may work over [GitHub](https://github.com) or [GitReport](https://gitreports.com/). For the developer configuration please use `config.h` header.
 
 Configuration
 -------------
 
-Edit `src/config.h.in` header and set up needed variables.
+Edit `src/config.h` header and set up needed variables or load parametrs dynamically using `params` array (**NOTE** please use the same keys as for `config.h`).
 
 ### Main configuration ###
 
@@ -100,15 +100,18 @@ Installation
 
 * declare class in you sources. For example:
 
-        Reportabug *reportWindow = new Reportabug(this, false);
+        Reportabug *reportWindow = new Reportabug(parent=this,
+                                                  debugCmd=false,
+                                                  params=0);
         reportWindow->showWindow();
 
 * link your application with this library
 
 ### Available cmake flags ###
 
-* `-DBUILD_AS_LIBRARY:BOOL=0` - build the application but not a shared library
+* `-DBUILD_AS_LIBRARY:BOOL=0` - build the application but not a library
 * `-DBUILD_DOCS:BOOL=1` - build developer documentation
+* `-DBUILD_SHARED_LIBRARY=1` - build a shared library instead of static one
 * `-DENABLE_GITHUB=0` - disable GitHub module
 * `-DENABLE_GITREPORT=0` - disable GitReport module
 * `-DOWN_GITHUB_TOKEN=STRING` - use STRING as own GitHub token

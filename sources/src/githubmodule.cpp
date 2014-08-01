@@ -35,8 +35,6 @@
 #include <QNetworkRequest>
 #include <QUrl>
 
-#include "config.h"
-
 
 /**
  * @class GithubModule
@@ -44,9 +42,10 @@
 /**
  * @fn GithubModule
  */
-GithubModule::GithubModule(QWidget *parent, bool debugCmd)
+GithubModule::GithubModule(QWidget *parent, bool debugCmd, QMap<QString, QString> params)
     : QObject(parent),
       debug(debugCmd),
+      dynamic(params),
       mainWindow((Reportabug *)parent)
 {
 }
@@ -75,12 +74,12 @@ QByteArray GithubModule::prepareRequest(const QString title, const QString body)
     QString fixBody = body;
     fixBody.replace(QString("\n"), QString("<br>"));
     requestList.append(QString("\"body\":\"") + fixBody + QString("\""));
-    if (!QString(TAG_ASSIGNEE).isEmpty())
-        requestList.append(QString("\"assignee\":\"") + parseString(QString(TAG_ASSIGNEE)) + QString("\""));
-    if (!QString(TAG_MILESTONE).isEmpty())
-        requestList.append(QString("\"milestone\":") + QString(TAG_MILESTONE));
-    if (!QString(TAG_LABELS).isEmpty()) {
-        QStringList labels = QString(TAG_LABELS).split(QChar(','));
+    if (!dynamic[QString("TAG_ASSIGNEE")].isEmpty())
+        requestList.append(QString("\"assignee\":\"") + parseString(dynamic[QString("TAG_ASSIGNEE")]) + QString("\""));
+    if (!dynamic[QString("TAG_MILESTONE")].isEmpty())
+        requestList.append(QString("\"milestone\":") + dynamic[QString("TAG_MILESTONE")]);
+    if (!dynamic[QString("TAG_LABELS")].isEmpty()) {
+        QStringList labels = dynamic[QString("TAG_LABELS")].split(QChar(','));
         for (int i=0; i<labels.count(); i++)
             labels[i] = QString("\"") + labels[i] + QString("\"");
         requestList.append(QString("\"labels\":[") + labels.join(QChar(',')) + QString("]"));
@@ -105,11 +104,11 @@ QString GithubModule::parseString(QString line)
 
     if (line.contains(QString("$OWNER")))
         line = line.split(QString("$OWNER"))[0] +
-                QString(OWNER) +
+                dynamic[QString("OWNER")] +
                 line.split(QString("$OWNER"))[1];
     if (line.contains(QString("$PROJECT")))
         line = line.split(QString("$PROJECT"))[0] +
-                QString(PROJECT) +
+                dynamic[QString("PROJECT")] +
                 line.split(QString("$PROJECT"))[1];
 
     return line;
@@ -136,7 +135,7 @@ void GithubModule::sendReportUsingGithub(const QMap<QString, QString> info)
     QByteArray text = prepareRequest(info[QString("title")], info[QString("body")]);
     QByteArray textSize = QByteArray::number(text.size());
     // sending request
-    QNetworkRequest request = QNetworkRequest(parseString(QString(ISSUES_URL)));
+    QNetworkRequest request = QNetworkRequest(parseString(dynamic[QString("ISSUES_URL")]));
     request.setRawHeader("Authorization", headerData.toLocal8Bit());
     request.setRawHeader("User-Agent", "reportabug");
     request.setRawHeader("Host", "api.github.com");
